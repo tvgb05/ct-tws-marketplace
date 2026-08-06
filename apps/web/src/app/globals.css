@@ -1768,6 +1768,44 @@ html[data-theme="dark"] .theme-toggle .theme-icon-sun {
   display: grid;
   gap: 8px;
 }
+.profile-linked-facebook {
+  display: grid;
+  gap: 8px;
+}
+.profile-linked-facebook > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.profile-linked-facebook > span svg {
+  color: var(--pine);
+}
+.profile-linked-facebook > a {
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1px solid #b8c9bf;
+  border-radius: 4px;
+  background: #edf4ef;
+  color: var(--pine);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.profile-linked-facebook > a:hover {
+  border-color: var(--pine);
+  background: #e4eee7;
+}
+.profile-linked-facebook > small {
+  color: #7c8999;
+  font-size: 8px;
+  line-height: 1.5;
+}
 .profile-setup-form > label > span {
   display: flex;
   align-items: center;
@@ -4267,6 +4305,15 @@ html[data-theme="dark"] .button-outline:hover,
 html[data-theme="dark"] .reset-filter:hover,
 html[data-theme="dark"] .filter-options button:hover {
   background: #213047;
+}
+html[data-theme="dark"] .profile-linked-facebook > a {
+  border-color: #3d5b4d;
+  background: #1b302a;
+  color: #b9d8c6;
+}
+html[data-theme="dark"] .profile-linked-facebook > a:hover {
+  border-color: #6f9b83;
+  background: #223c34;
 }
 html[data-theme="dark"] .filter-panel,
 html[data-theme="dark"] .subcategory-filter,

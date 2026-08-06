@@ -2,6 +2,7 @@
 
 import {
   ArrowRight,
+  ExternalLink,
   Facebook,
   LoaderCircle,
   LockKeyhole,
@@ -121,15 +122,23 @@ export default function CompleteProfilePage() {
             <small>Chấp nhận số Việt Nam bắt đầu bằng 0 hoặc +84.</small>
           </label>
           {user.facebookProfileUrl ? (
-            <label>
+            <div className="profile-linked-facebook">
               <span>
                 <Facebook size={16} /> Đường dẫn Facebook
               </span>
-              <input disabled type="url" value={user.facebookProfileUrl} />
+              <a
+                href={user.facebookProfileUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Hồ sơ Facebook đã liên kết <ExternalLink size={15} />
+              </a>
               <small>
-                Hồ sơ đã có đường dẫn Facebook, bạn không cần nhập lại.
+                Meta có thể trả về URL dạng app_scoped_user_id thay vì username.
+                Đây vẫn là liên kết hồ sơ gắn với tài khoản Facebook đã đăng
+                nhập.
               </small>
-            </label>
+            </div>
           ) : (
             <label>
               <span>

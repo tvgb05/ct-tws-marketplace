@@ -47,13 +47,13 @@ const faqGroups = [
       {
         question: "Website nhận được thông tin gì khi tôi đăng nhập Facebook?",
         answer:
-          "Luồng đăng nhập hiện chỉ nhận mã người dùng theo ứng dụng, tên hiển thị và ảnh đại diện. Facebook không cung cấp ngày tạo tài khoản hoặc đường dẫn trang cá nhân qua luồng này.",
+          "Luồng đăng nhập nhận mã người dùng theo ứng dụng, tên hiển thị, ảnh đại diện và liên kết hồ sơ nếu bạn cấp quyền user_link. Liên kết có thể mang dạng app_scoped_user_id thay vì username. Facebook không cung cấp ngày tạo tài khoản.",
       },
       {
         question:
           "Số điện thoại và đường dẫn Facebook có được Meta xác minh không?",
         answer:
-          "Không. Đây là thông tin người dùng tự nhập để liên hệ giao dịch. Website chỉ kiểm tra định dạng cơ bản và không thể xác nhận đường dẫn đó thuộc chính người đăng nhập.",
+          "Liên kết user_link do Meta trả về được gắn với tài khoản Facebook đã đăng nhập. Nếu Meta không trả liên kết, URL Facebook và số điện thoại do người dùng nhập tay chỉ được kiểm tra định dạng, không được Meta xác minh.",
       },
       {
         question: "Khi nào thông tin liên hệ của tôi được hiển thị?",
