@@ -152,8 +152,8 @@ export default function CompleteProfilePage() {
                 placeholder="https://www.facebook.com/ten-cua-ban"
               />
               <small>
-                Meta chưa trả về đường dẫn. Hãy mở trang cá nhân Facebook, sao
-                chép URL rồi dán vào đây.
+                Google và đăng nhập email không cung cấp đường dẫn Facebook.
+                Hãy mở trang cá nhân Facebook, sao chép URL rồi dán vào đây.
               </small>
             </label>
           )}

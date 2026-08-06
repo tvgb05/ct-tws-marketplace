@@ -174,7 +174,7 @@ export function Header() {
                     <small>
                       {user?.role === "ADMIN"
                         ? "Tài khoản quản trị"
-                        : "Đăng nhập bằng Facebook"}
+                        : "Tài khoản thành viên"}
                     </small>
                   </span>
                 </div>

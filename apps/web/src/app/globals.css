@@ -1682,6 +1682,143 @@ html[data-theme="dark"] .theme-toggle .theme-icon-sun {
 .facebook-button:hover {
   background: #0d68d8;
 }
+.google-login-button {
+  min-height: 52px;
+  margin: 24px 0 12px;
+  border: 1px solid #cfd6dc;
+  border-radius: 4px;
+  background: #fff;
+  color: #24312d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+  font-size: 11px;
+  font-weight: 700;
+  transition: 0.2s;
+}
+.google-login-button:hover {
+  border-color: #9da9b3;
+  background: #f7f9fa;
+  transform: translateY(-1px);
+}
+.google-login-button.disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+.google-login-button > span {
+  width: 23px;
+  height: 23px;
+  border: 1px solid #dbe1e5;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #4285f4;
+  font: 700 14px/1 Arial, sans-serif;
+}
+.email-otp-form {
+  display: grid;
+  gap: 11px;
+}
+.email-otp-form fieldset {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: 11px;
+}
+.email-otp-form fieldset:disabled {
+  opacity: 0.55;
+}
+.email-otp-form fieldset > label {
+  display: grid;
+  gap: 5px;
+  color: #34443e;
+  font-size: 9px;
+  font-weight: 700;
+}
+.auth-method-unavailable {
+  margin: 0;
+  padding: 8px 10px;
+  background: #fff4df;
+  color: #895e20;
+  font-size: 9px;
+  line-height: 1.5;
+}
+.email-otp-input {
+  min-height: 43px;
+  padding: 0 12px;
+  border: 1px solid #d6dcd9;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #718079;
+  transition: 0.2s;
+}
+.email-otp-input:focus-within {
+  border-color: var(--pine);
+  box-shadow: 0 0 0 3px rgba(29, 78, 62, 0.08);
+}
+.email-otp-input input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 11px;
+}
+.email-otp-input.code input {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+}
+.email-otp-submit {
+  min-height: 45px;
+  border: 0;
+  background: var(--pine);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 700;
+}
+.email-otp-submit:hover:not(:disabled) {
+  background: #163f33;
+}
+.email-otp-submit:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+.email-otp-back {
+  width: max-content;
+  border: 0;
+  background: transparent;
+  color: var(--pine);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9px;
+  font-weight: 700;
+}
+.auth-box > .email-otp-message {
+  margin: 9px 0 0;
+  padding: 8px 10px;
+  font-size: 9px;
+  line-height: 1.5;
+}
+.email-otp-message.success {
+  background: #edf6ef;
+  color: #27613e;
+}
+.email-otp-message.error {
+  background: #fff0ed;
+  color: #a43b2e;
+}
 .auth-divider {
   display: flex;
   align-items: center;
@@ -1718,7 +1855,7 @@ html[data-theme="dark"] .theme-toggle .theme-icon-sun {
 }
 .remember-login {
   min-height: 46px;
-  margin-bottom: 20px;
+  margin: 14px 0 16px;
   padding: 8px 10px;
   border: 1px solid #d9e0e8;
   background: rgba(255, 255, 255, 0.55);
@@ -1750,6 +1887,7 @@ html[data-theme="dark"] .theme-toggle .theme-icon-sun {
   font-size: 8px;
 }
 .auth-security {
+  margin-top: 18px;
   display: flex;
   gap: 10px;
   background: #eef2e9;
@@ -4645,6 +4783,32 @@ html[data-theme="dark"] .admin-confirm-list article {
 }
 html[data-theme="dark"] .auth-page {
   background: #111b2b;
+}
+html[data-theme="dark"] .google-login-button,
+html[data-theme="dark"] .email-otp-input {
+  background: #162337;
+  border-color: #35445a;
+  color: #d8e0eb;
+}
+html[data-theme="dark"] .google-login-button:hover {
+  background: #1d2c42;
+  border-color: #52627a;
+}
+html[data-theme="dark"] .email-otp-form fieldset > label,
+html[data-theme="dark"] .email-otp-input input {
+  color: #d8e0eb;
+}
+html[data-theme="dark"] .auth-method-unavailable {
+  background: #3e321f;
+  color: #efc47d;
+}
+html[data-theme="dark"] .email-otp-message.success {
+  background: #193729;
+  color: #a9dfbd;
+}
+html[data-theme="dark"] .email-otp-message.error {
+  background: #432724;
+  color: #f3b2a7;
 }
 html[data-theme="dark"] .remember-login,
 html[data-theme="dark"] .auth-security,

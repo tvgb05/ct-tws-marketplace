@@ -110,7 +110,7 @@ export default function AccountPage() {
           <p>
             {user.role === "ADMIN"
               ? "Tài khoản quản trị"
-              : "Đăng nhập qua Facebook"}{" "}
+              : "Tài khoản thành viên"}{" "}
             · Tham gia marketplace từ {joined}
           </p>
         </div>

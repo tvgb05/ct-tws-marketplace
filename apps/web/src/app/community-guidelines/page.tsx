@@ -45,15 +45,15 @@ const faqGroups = [
     title: "Quyền riêng tư",
     items: [
       {
-        question: "Website nhận được thông tin gì khi tôi đăng nhập Facebook?",
+        question: "Website nhận được thông tin gì khi tôi đăng nhập?",
         answer:
-          "Luồng đăng nhập nhận mã người dùng theo ứng dụng, tên hiển thị, ảnh đại diện và liên kết hồ sơ nếu bạn cấp quyền user_link. Liên kết có thể mang dạng app_scoped_user_id thay vì username. Facebook không cung cấp ngày tạo tài khoản.",
+          "Google cung cấp mã tài khoản theo ứng dụng, tên hiển thị, email và ảnh đại diện. Với đăng nhập email, website chỉ xác nhận quyền sở hữu email bằng mã OTP dùng một lần; website không nhận mật khẩu Google hoặc mật khẩu email của bạn.",
       },
       {
         question:
-          "Số điện thoại và đường dẫn Facebook có được Meta xác minh không?",
+          "Số điện thoại và đường dẫn Facebook có được xác minh không?",
         answer:
-          "Liên kết user_link do Meta trả về được gắn với tài khoản Facebook đã đăng nhập. Nếu Meta không trả liên kết, URL Facebook và số điện thoại do người dùng nhập tay chỉ được kiểm tra định dạng, không được Meta xác minh.",
+          "URL Facebook và số điện thoại do người dùng nhập tay chỉ được kiểm tra định dạng, không được Google, Meta hoặc website tự động xác minh. Hãy đối chiếu thông tin và nhờ admin hỗ trợ nếu có dấu hiệu giả mạo.",
       },
       {
         question: "Khi nào thông tin liên hệ của tôi được hiển thị?",

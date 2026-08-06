@@ -23,6 +23,20 @@ export interface FacebookProfile {
   profileUrl?: string;
 }
 
+export interface GoogleProfile {
+  providerUserId: string;
+  displayName: string;
+  avatarUrl?: string;
+  email: string;
+}
+
+interface LoginProfile {
+  providerUserId: string;
+  displayName: string;
+  avatarUrl?: string;
+  email?: string;
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -37,10 +51,48 @@ export class AuthService {
     const facebookProfileUrl = this.normalizeFacebookProfileUrl(
       profile.profileUrl,
     );
+    return this.loginWithIdentity(
+      AuthProvider.FACEBOOK,
+      profile,
+      rememberForThirtyDays,
+      facebookProfileUrl,
+    );
+  }
+
+  loginWithGoogle(profile: GoogleProfile, rememberForThirtyDays = false) {
+    return this.loginWithIdentity(
+      AuthProvider.GOOGLE,
+      profile,
+      rememberForThirtyDays,
+    );
+  }
+
+  loginWithEmail(
+    email: string,
+    displayName: string,
+    rememberForThirtyDays = false,
+  ) {
+    return this.loginWithIdentity(
+      AuthProvider.EMAIL,
+      {
+        providerUserId: email,
+        displayName: displayName.trim(),
+        email,
+      },
+      rememberForThirtyDays,
+    );
+  }
+
+  private async loginWithIdentity(
+    provider: AuthProvider,
+    profile: LoginProfile,
+    rememberForThirtyDays: boolean,
+    facebookProfileUrl?: string,
+  ) {
     const identity = await this.prisma.authIdentity.findUnique({
       where: {
         provider_providerUserId: {
-          provider: AuthProvider.FACEBOOK,
+          provider,
           providerUserId: profile.providerUserId,
         },
       },
@@ -52,32 +104,69 @@ export class AuthService {
         "Tài khoản quản trị chỉ được đăng nhập bằng cổng quản trị",
       );
 
+    const usersByEmail =
+      !identity && profile.email
+        ? await this.prisma.user.findMany({
+            where: {
+              email: { equals: profile.email, mode: "insensitive" },
+            },
+            take: 2,
+          })
+        : [];
+    if (usersByEmail.length > 1)
+      throw new ConflictException(
+        "Email này đang gắn với nhiều tài khoản. Vui lòng liên hệ admin.",
+      );
+    const existingByEmail = usersByEmail[0] ?? null;
+    if (existingByEmail?.role === "ADMIN")
+      throw new UnauthorizedException(
+        "Tài khoản quản trị chỉ được đăng nhập bằng cổng quản trị",
+      );
+    const existingAccount = identity?.user ?? existingByEmail;
+    if (existingAccount && existingAccount.status !== "ACTIVE")
+      throw new UnauthorizedException("Tài khoản đã bị hạn chế");
+
+    const profileUpdates = {
+      ...(provider !== AuthProvider.EMAIL
+        ? {
+            displayName: profile.displayName,
+            avatarUrl: profile.avatarUrl,
+          }
+        : {}),
+      email: profile.email,
+      ...(facebookProfileUrl ? { facebookProfileUrl } : {}),
+      lastLoginAt: new Date(),
+    };
     const user = identity
       ? await this.prisma.user.update({
           where: { id: identity.userId },
-          data: {
-            displayName: profile.displayName,
-            avatarUrl: profile.avatarUrl,
-            email: profile.email,
-            ...(facebookProfileUrl ? { facebookProfileUrl } : {}),
-            lastLoginAt: new Date(),
-          },
+          data: profileUpdates,
         })
-      : await this.prisma.user.create({
-          data: {
-            displayName: profile.displayName,
-            avatarUrl: profile.avatarUrl,
-            email: profile.email,
-            facebookProfileUrl,
-            lastLoginAt: new Date(),
-            authIdentities: {
-              create: {
-                provider: AuthProvider.FACEBOOK,
-                providerUserId: profile.providerUserId,
+      : existingByEmail
+        ? await this.prisma.user.update({
+            where: { id: existingByEmail.id },
+            data: {
+              ...profileUpdates,
+              authIdentities: {
+                create: { provider, providerUserId: profile.providerUserId },
               },
             },
-          },
-        });
+          })
+        : await this.prisma.user.create({
+            data: {
+              displayName: profile.displayName,
+              avatarUrl: profile.avatarUrl,
+              email: profile.email,
+              facebookProfileUrl,
+              lastLoginAt: new Date(),
+              authIdentities: {
+                create: {
+                  provider,
+                  providerUserId: profile.providerUserId,
+                },
+              },
+            },
+          });
 
     if (user.status !== "ACTIVE")
       throw new UnauthorizedException("Tài khoản đã bị hạn chế");

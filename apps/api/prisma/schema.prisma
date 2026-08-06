@@ -74,6 +74,19 @@ model AuthIdentity {
   @@index([userId])
 }
 
+model EmailLoginCode {
+  id         String    @id @default(cuid())
+  email      String
+  codeHash   String
+  attempts   Int       @default(0)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([email, createdAt])
+  @@index([expiresAt])
+}
+
 model MarketplaceAd {
   id          String                 @id @default(cuid())
   placement   MarketplaceAdPlacement @unique

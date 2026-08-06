@@ -100,19 +100,28 @@ không có quyền truy cập dashboard hay API quản trị. Seed chạy lặp 
 không ghi đè mật khẩu đã tồn tại. Thông tin liên hệ của tài khoản demo là dữ liệu
 giả lập, không đại diện cho người dùng thật và không nên bật trên production.
 
-## Cấu hình Facebook Login
+## Cấu hình đăng nhập Google và email OTP
 
-1. Tạo app trong Meta for Developers và bật Facebook Login for Business/Web.
-2. Thêm callback URI: `http://localhost:4000/api/v1/auth/facebook/callback`.
-3. Điền `FACEBOOK_APP_ID` và `FACEBOOK_APP_SECRET` trong `.env`.
-4. Với production, đặt đúng `WEB_URL`, `FACEBOOK_CALLBACK_URL`, bật `COOKIE_SECURE=true` và dùng một `JWT_SECRET` ngẫu nhiên dài.
+1. Tạo OAuth 2.0 Client loại Web application trong Google Cloud Console.
+2. Thêm callback local: `http://localhost:4000/api/v1/auth/google/callback`.
+3. Điền `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` và `GOOGLE_CALLBACK_URL`.
+4. Để gửi OTP, cấu hình `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`,
+   `SMTP_PASSWORD` và `MAIL_FROM`. SMTP cổng 465 thường dùng
+   `SMTP_SECURE=true`; cổng 587 thường dùng `false`.
+5. Local có thể đặt `EMAIL_OTP_DEV_ECHO=true` để API trả mã kiểm thử mà không
+   gửi mail. Production luôn bỏ qua chế độ này khi `NODE_ENV=production`.
+6. Với production, đặt đúng `WEB_URL`, bật `COOKIE_SECURE=true` và dùng một
+   `JWT_SECRET` ngẫu nhiên dài.
 
-Facebook Login xác nhận người dùng kiểm soát tài khoản đã cấp quyền; nó không xác minh danh tính, tuổi tài khoản hoặc việc tài khoản đó thuộc Facebook Group.
+Google chỉ được dùng khi trả về email đã xác minh. OTP email hết hạn sau 10
+phút, tối đa 5 lần nhập sai, chỉ dùng một lần và được lưu dưới dạng bản băm.
+Facebook OAuth cũ vẫn còn ở backend để không làm mất liên kết của tài khoản đã
+tồn tại, nhưng không còn là lựa chọn đăng nhập chính.
 
 ## Phạm vi MVP đã triển khai
 
 - Marketplace responsive, tìm kiếm, lọc danh mục/tình trạng, sắp xếp và trang chi tiết.
-- Facebook OAuth do backend quản lý; application session không lưu trong localStorage. Người dùng có thể chọn cookie HTTP-only duy trì đăng nhập trong 30 ngày; nếu không chọn, cookie chỉ tồn tại theo phiên trình duyệt và JWT hết hạn sau 15 phút.
+- Google OAuth và email OTP do backend quản lý; application session không lưu trong localStorage. Người dùng có thể chọn cookie HTTP-only duy trì đăng nhập trong 30 ngày; nếu không chọn, cookie chỉ tồn tại theo phiên trình duyệt và JWT hết hạn sau 15 phút.
 - Cổng admin riêng dùng email/mật khẩu, giới hạn số lần thử đăng nhập và cho phép admin đang hoạt động cấp thêm tài khoản admin. Admin không đăng nhập qua Facebook.
 - Sau giao dịch hoàn tất, người mua và người bán có thể đánh giá đối phương một lần với thang 1–5 sao. Hồ sơ thành viên công khai số giao dịch bán hoàn tất, điểm trung bình và các đánh giá gần đây gắn với bài đăng thực tế.
 - Thành viên có thể tố cáo tài khoản khác; phiếu tố cáo được lưu riêng và hiển thị trong dashboard admin. Khi xác nhận vi phạm, admin có thể khóa riêng quyền đăng bài mà không khóa đăng nhập, ghi lý do xử lý và cấp lại quyền sau đó. Mỗi thay đổi đều tạo thông báo chưa đọc cho thành viên và audit log cho admin.
