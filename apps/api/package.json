@@ -10,6 +10,7 @@
     "lint": "eslint \"src/**/*.ts\"",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
     "prisma:seed": "tsx --env-file=../../.env prisma/seed.ts",
     "test:reputation": "tsx --env-file=../../.env prisma/reputation-e2e.ts",
     "test:inventory": "tsx --env-file=../../.env prisma/inventory-e2e.ts",

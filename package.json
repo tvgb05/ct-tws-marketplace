@@ -15,6 +15,7 @@
     "format": "prettier --write .",
     "db:generate": "pnpm --filter @tws/api prisma:generate",
     "db:migrate": "pnpm --filter @tws/api prisma:migrate",
+    "db:deploy": "pnpm --filter @tws/api prisma:deploy",
     "db:seed": "pnpm --filter @tws/api prisma:seed",
     "db:studio": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/prisma-studio.ps1",
     "test:reputation": "pnpm --filter @tws/api test:reputation",
