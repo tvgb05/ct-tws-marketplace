@@ -1,0 +1,396 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                       String             @id @default(cuid())
+  displayName              String
+  avatarUrl                String?
+  email                    String?
+  phoneNumber              String?
+  facebookProfileUrl       String?
+  profileCompletedAt       DateTime?
+  role                     UserRole           @default(USER)
+  status                   UserStatus         @default(ACTIVE)
+  contactType              ContactType?
+  contactValue             String?
+  sellerPolicyAcceptedAt   DateTime?
+  sellerPolicyVersion      String?
+  canPostListings          Boolean            @default(true)
+  postingRestrictionReason String?
+  postingRestrictedAt      DateTime?
+  joinedAt                 DateTime           @default(now())
+  lastLoginAt              DateTime?
+  createdAt                DateTime           @default(now())
+  updatedAt                DateTime           @updatedAt
+  authIdentities           AuthIdentity[]
+  adminCredential          AdminCredential?
+  listings                 Listing[]
+  favorites                Favorite[]
+  submittedReports         Report[]           @relation("SubmittedReports")
+  handledReports           Report[]           @relation("HandledReports")
+  mediationAsBuyer         MediationRequest[] @relation("MediationBuyer")
+  mediationAsSeller        MediationRequest[] @relation("MediationSeller")
+  mediationAsAdmin         MediationRequest[] @relation("MediationAdmin")
+  tradesAsBuyer            ListingTrade[]     @relation("TradeBuyer")
+  tradesAsSeller           ListingTrade[]     @relation("TradeSeller")
+  tradesCompletedByAdmin   ListingTrade[]     @relation("TradeCompletedByAdmin")
+  notifications            Notification[]
+  auditLogs                AuditLog[]         @relation("AuditActor")
+  reviewsWritten           UserReview[]       @relation("ReviewAuthor")
+  reviewsReceived          UserReview[]       @relation("ReviewRecipient")
+  userReportsSubmitted     UserReport[]        @relation("UserReportReporter")
+  userReportsReceived      UserReport[]        @relation("UserReportSubject")
+  handledUserReports       UserReport[]        @relation("UserReportHandler")
+}
+
+model AdminCredential {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  email        String   @unique
+  passwordHash String
+  createdById  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([createdById])
+}
+
+model AuthIdentity {
+  id             String       @id @default(cuid())
+  userId         String
+  provider       AuthProvider
+  providerUserId String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([provider, providerUserId])
+  @@index([userId])
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  icon      String?
+  isActive  Boolean   @default(true)
+  sortOrder Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  listings  Listing[]
+}
+
+model Listing {
+  id                  String           @id @default(cuid())
+  sellerId            String
+  categoryId          String
+  subcategory         String?
+  title               String
+  slug                String           @unique
+  description         String
+  condition           ListingCondition
+  price               Decimal          @db.Decimal(15, 2)
+  location            String
+  deliveryMethod      DeliveryMethod
+  contactType         ContactType
+  contactValue        String
+  allowAdminMediation Boolean          @default(true)
+  status              ListingStatus    @default(AVAILABLE)
+  moderationStatus    ModerationStatus @default(APPROVED)
+  viewCount           Int              @default(0)
+  totalQuantity       Int              @default(1)
+  reservedQuantity    Int              @default(0)
+  soldQuantity        Int              @default(0)
+  searchText          String           @default("") @db.Text
+  sharedPhotoGroupId  String?
+  sharedPhotoItemCount Int?
+  productCode         String?
+  orderCode           String?
+  publishedAt         DateTime?
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  deletedAt           DateTime?
+  seller              User             @relation(fields: [sellerId], references: [id])
+  category            Category         @relation(fields: [categoryId], references: [id])
+  images              ListingImage[]
+  favorites           Favorite[]
+  reports             Report[]
+  mediationRequests   MediationRequest[]
+  trades              ListingTrade[]
+  @@index([sellerId])
+  @@index([categoryId])
+  @@index([status, moderationStatus])
+  @@index([sharedPhotoGroupId])
+  @@index([orderCode])
+  @@index([productCode])
+  @@index([createdAt])
+}
+
+model ListingImage {
+  id        String   @id @default(cuid())
+  listingId String
+  publicId  String
+  secureUrl String
+  width     Int?
+  height    Int?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  @@index([listingId])
+}
+
+model Favorite {
+  userId    String
+  listingId String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  @@id([userId, listingId])
+}
+
+model Report {
+  id          String       @id @default(cuid())
+  listingId   String
+  reporterId  String
+  reason      ReportReason
+  description String?
+  status      ReportStatus @default(OPEN)
+  handledById String?
+  resolution  String?
+  createdAt   DateTime     @default(now())
+  resolvedAt  DateTime?
+  listing     Listing      @relation(fields: [listingId], references: [id])
+  reporter    User         @relation("SubmittedReports", fields: [reporterId], references: [id])
+  handledBy   User?        @relation("HandledReports", fields: [handledById], references: [id])
+  @@index([listingId])
+  @@index([reporterId])
+  @@index([status])
+}
+
+model MediationRequest {
+  id                String          @id @default(cuid())
+  listingId         String
+  buyerId           String
+  sellerId          String
+  assignedAdminId   String?
+  buyerNote         String?
+  sellerNote        String?
+  adminNote         String?
+  status            MediationStatus @default(REQUESTED)
+  createdAt         DateTime        @default(now())
+  sellerRespondedAt DateTime?
+  assignedAt        DateTime?
+  completedAt       DateTime?
+  cancelledAt       DateTime?
+  listing           Listing         @relation(fields: [listingId], references: [id])
+  buyer             User            @relation("MediationBuyer", fields: [buyerId], references: [id])
+  seller            User            @relation("MediationSeller", fields: [sellerId], references: [id])
+  admin             User?           @relation("MediationAdmin", fields: [assignedAdminId], references: [id])
+  trade             ListingTrade?
+  @@index([listingId])
+  @@index([buyerId])
+  @@index([sellerId])
+  @@index([assignedAdminId])
+  @@index([status])
+}
+
+model ListingTrade {
+  id                 String             @id @default(cuid())
+  listingId          String
+  buyerId            String
+  sellerId           String
+  mediationRequestId String?            @unique
+  completedByAdminId String?
+  status             ListingTradeStatus @default(QUEUED)
+  queuePosition      Int?
+  requestedQuantity  Int                @default(1)
+  allocatedQuantity  Int                @default(1)
+  createdAt          DateTime           @default(now())
+  activatedAt        DateTime?
+  completedAt        DateTime?
+  cancelledAt        DateTime?
+  listing            Listing            @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyer              User               @relation("TradeBuyer", fields: [buyerId], references: [id])
+  seller             User               @relation("TradeSeller", fields: [sellerId], references: [id])
+  mediationRequest   MediationRequest?  @relation(fields: [mediationRequestId], references: [id])
+  completedByAdmin   User?              @relation("TradeCompletedByAdmin", fields: [completedByAdminId], references: [id])
+  reviews            UserReview[]
+  @@index([listingId, status])
+  @@index([listingId, buyerId, status])
+  @@index([buyerId, status])
+  @@index([sellerId, status])
+}
+
+model UserReview {
+  id         String       @id @default(cuid())
+  tradeId    String
+  reviewerId String
+  revieweeId String
+  rating     Int
+  comment    String?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  trade      ListingTrade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  reviewer   User         @relation("ReviewAuthor", fields: [reviewerId], references: [id], onDelete: Cascade)
+  reviewee   User         @relation("ReviewRecipient", fields: [revieweeId], references: [id], onDelete: Cascade)
+
+  @@unique([tradeId, reviewerId])
+  @@index([revieweeId, createdAt])
+  @@index([reviewerId])
+}
+
+model UserReport {
+  id             String           @id @default(cuid())
+  reporterId     String
+  reportedUserId String
+  reason         UserReportReason
+  description    String?
+  status         ReportStatus     @default(OPEN)
+  handledById    String?
+  resolution     String?
+  createdAt      DateTime         @default(now())
+  resolvedAt     DateTime?
+  reporter       User             @relation("UserReportReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reportedUser   User             @relation("UserReportSubject", fields: [reportedUserId], references: [id], onDelete: Cascade)
+  handledBy      User?            @relation("UserReportHandler", fields: [handledById], references: [id])
+
+  @@index([reporterId])
+  @@index([reportedUserId])
+  @@index([status, createdAt])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  targetUrl String?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, readAt])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String
+  entityType String
+  entityId   String?
+  oldData    Json?
+  newData    Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+  actor      User?    @relation("AuditActor", fields: [actorId], references: [id])
+  @@index([actorId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+}
+enum AuthProvider {
+  FACEBOOK
+  GOOGLE
+  EMAIL
+}
+enum ListingCondition {
+  NEW
+  USED
+}
+enum ListingStatus {
+  AVAILABLE
+  RESERVED
+  SOLD
+  HIDDEN
+}
+enum ModerationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+enum DeliveryMethod {
+  MEETUP
+  SHIPPING
+  BOTH
+}
+enum ContactType {
+  FACEBOOK
+  MESSENGER
+  ZALO
+  PHONE
+  OTHER
+}
+enum ReportReason {
+  SPAM
+  MISLEADING_INFORMATION
+  SUSPICIOUS_SELLER
+  POSSIBLE_SCAM
+  INAPPROPRIATE_CONTENT
+  DUPLICATE_LISTING
+  ALREADY_SOLD
+  OTHER
+}
+enum ReportStatus {
+  OPEN
+  REVIEWING
+  RESOLVED
+  DISMISSED
+}
+enum MediationStatus {
+  REQUESTED
+  SELLER_ACCEPTED
+  SELLER_REJECTED
+  ADMIN_ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+enum ListingTradeStatus {
+  QUEUED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+  DECLINED
+}
+enum NotificationType {
+  MEDIATION_REQUESTED
+  MEDIATION_ACCEPTED
+  MEDIATION_REJECTED
+  MEDIATION_ASSIGNED
+  MEDIATION_UPDATED
+  REPORT_RESOLVED
+  LISTING_HIDDEN
+  LISTING_REJECTED
+  TRADE_REQUESTED
+  TRADE_QUEUED
+  TRADE_ACTIVATED
+  TRADE_COMPLETED
+  TRADE_CANCELLED
+  REVIEW_RECEIVED
+  SYSTEM
+}
+
+enum UserReportReason {
+  SUSPECTED_FRAUD
+  IMPERSONATION
+  HARASSMENT
+  SPAM
+  MISLEADING_PROFILE
+  OTHER
+}

@@ -1,0 +1,335 @@
+"use client";
+
+/* eslint-disable @next/next/no-img-element */
+
+import {
+  AlertTriangle,
+  Handshake,
+  LoaderCircle,
+  Package,
+  Users,
+} from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { AdminAccountManager } from "@/features/admin/admin-account-manager";
+import { AdminPasswordForm } from "@/features/admin/admin-password-form";
+import {
+  AdminUserReportActions,
+  RestorePostingPermissionButton,
+} from "@/features/admin/admin-user-moderation-actions";
+import { AdminTradeConfirmations } from "@/features/trade/admin-trade-confirmations";
+import { AdminBadge } from "@/components/admin-badge";
+import { useAuth } from "@/lib/auth";
+import { initials, relativeListingTime } from "@/lib/marketplace-types";
+
+const apiUrl =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
+type Overview = {
+  listings: number;
+  users: number;
+  openReports: number;
+  activeMediations: number;
+  recentReports: Array<{
+    id: string;
+    reason: string;
+    status: string;
+    createdAt: string;
+    listing: { title: string };
+    reporter: { id: string; displayName: string; role: "USER" | "ADMIN" };
+  }>;
+  recentUserReports: Array<{
+    id: string;
+    reason: string;
+    description: string | null;
+    status: string;
+    createdAt: string;
+    reporter: {
+      id: string;
+      displayName: string;
+      role: "USER" | "ADMIN";
+    };
+    reportedUser: {
+      id: string;
+      displayName: string;
+      role: "USER" | "ADMIN";
+      canPostListings: boolean;
+      postingRestrictionReason: string | null;
+    };
+  }>;
+  restrictedUsers: Array<{
+    id: string;
+    displayName: string;
+    email: string | null;
+    postingRestrictionReason: string | null;
+    postingRestrictedAt: string | null;
+  }>;
+};
+
+const userReportReasonLabel: Record<string, string> = {
+  SUSPECTED_FRAUD: "Nghi ngờ lừa đảo",
+  IMPERSONATION: "Mạo danh",
+  HARASSMENT: "Quấy rối",
+  SPAM: "Spam",
+  MISLEADING_PROFILE: "Hồ sơ gây hiểu nhầm",
+  OTHER: "Khác",
+};
+
+export default function AdminPage() {
+  const { user } = useAuth();
+  const [overview, setOverview] = useState<Overview | null>(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    if (user?.role !== "ADMIN") return;
+    void fetch(`${apiUrl}/admin/overview`, {
+      credentials: "include",
+      cache: "no-store",
+    })
+      .then(async (response) => {
+        if (response.ok) setOverview((await response.json()) as Overview);
+      })
+      .finally(() => setLoading(false));
+  }, [user?.role]);
+  if (!user) return null;
+  if (user.role !== "ADMIN")
+    return (
+      <main className="dashboard-page">
+        <div className="notification-empty">
+          Tài khoản của bạn không có quyền truy cập trang quản trị.
+        </div>
+      </main>
+    );
+  const stats = overview
+    ? [
+        { icon: Package, value: overview.listings, label: "Bài đăng" },
+        { icon: Users, value: overview.users, label: "Thành viên marketplace" },
+        {
+          icon: AlertTriangle,
+          value: overview.openReports,
+          label: "Báo cáo đang mở",
+        },
+        {
+          icon: Handshake,
+          value: overview.activeMediations,
+          label: "Giao dịch trung gian",
+        },
+      ]
+    : [];
+  return (
+    <main className="dashboard-page">
+      <div className="dashboard-heading">
+        <div>
+          <span className="section-kicker">QUẢN TRỊ CỘNG ĐỒNG</span>
+          <h1>Tổng quan marketplace</h1>
+          <p>Số liệu được tổng hợp trực tiếp từ database.</p>
+        </div>
+        <div className="admin-identity">
+          <span className="avatar avatar-small">
+            {user.avatarUrl ? (
+              <img
+                src={user.avatarUrl}
+                alt={user.displayName}
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              initials(user.displayName)
+            )}
+          </span>
+          <span>
+            <strong>{user.displayName}</strong>
+            <small>Tài khoản quản trị</small>
+          </span>
+          <b className="admin-tag">ADMIN</b>
+        </div>
+      </div>
+      {loading ? (
+        <div className="notification-empty">
+          <LoaderCircle className="spin" /> Đang tải số liệu…
+        </div>
+      ) : overview ? (
+        <>
+          <div className="admin-stats">
+            {stats.map(({ icon: Icon, value, label }) => (
+              <article key={label}>
+                <Icon />
+                <small>{label}</small>
+                <strong>{value}</strong>
+                <span>Dữ liệu hiện tại</span>
+              </article>
+            ))}
+          </div>
+          <AdminPasswordForm />
+          <AdminAccountManager />
+          <AdminTradeConfirmations />
+          <section className="admin-table admin-restricted-user-table">
+            <div>
+              <h2>Tài khoản đang bị khóa quyền đăng bài</h2>
+              <p>
+                Thành viên vẫn đăng nhập và xử lý giao dịch cũ, nhưng không thể
+                tải ảnh hoặc tạo bài đăng mới.
+              </p>
+            </div>
+            {overview.restrictedUsers.length ? (
+              <table>
+                <thead>
+                  <tr>
+                    <th>Thành viên</th>
+                    <th>Lý do</th>
+                    <th>Thời gian khóa</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {overview.restrictedUsers.map((member) => (
+                    <tr key={member.id}>
+                      <td>
+                        <Link href={`/users/${member.id}`}>
+                          {member.displayName}
+                        </Link>
+                        {member.email && <small>{member.email}</small>}
+                      </td>
+                      <td>
+                        {member.postingRestrictionReason ||
+                          "Vi phạm quy tắc cộng đồng"}
+                      </td>
+                      <td>
+                        {member.postingRestrictedAt
+                          ? relativeListingTime(member.postingRestrictedAt)
+                          : "Không rõ"}
+                      </td>
+                      <td>
+                        <RestorePostingPermissionButton
+                          userId={member.id}
+                          onRestored={() => window.location.reload()}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="notification-empty">
+                Hiện không có tài khoản nào bị khóa quyền đăng bài.
+              </div>
+            )}
+          </section>
+          <section className="admin-table admin-user-report-table">
+            <div>
+              <h2>Tố cáo người dùng đang chờ xử lý</h2>
+            </div>
+            {overview.recentUserReports.length ? (
+              <table>
+                <thead>
+                  <tr>
+                    <th>Người bị tố cáo</th>
+                    <th>Lý do</th>
+                    <th>Mô tả</th>
+                    <th>Người gửi</th>
+                    <th>Thời gian</th>
+                    <th>Trạng thái</th>
+                    <th>Xử lý</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {overview.recentUserReports.map((report) => (
+                    <tr key={report.id}>
+                      <td>
+                        <Link
+                          className="identity-name-line"
+                          href={`/users/${report.reportedUser.id}`}
+                        >
+                          {report.reportedUser.displayName}
+                          <AdminBadge role={report.reportedUser.role} />
+                        </Link>
+                      </td>
+                      <td>
+                        {userReportReasonLabel[report.reason] ?? report.reason}
+                      </td>
+                      <td>{report.description || "Không có mô tả"}</td>
+                      <td>
+                        <Link
+                          className="identity-name-line"
+                          href={`/users/${report.reporter.id}`}
+                        >
+                          {report.reporter.displayName}
+                          <AdminBadge role={report.reporter.role} />
+                        </Link>
+                      </td>
+                      <td>{relativeListingTime(report.createdAt)}</td>
+                      <td>
+                        <span
+                          className={`status-badge ${report.status === "OPEN" ? "warning" : ""}`}
+                        >
+                          {report.status === "OPEN" ? "Chưa xem" : "Đang xem"}
+                        </span>
+                      </td>
+                      <td>
+                        <AdminUserReportActions
+                          reportId={report.id}
+                          onResolved={() => window.location.reload()}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="notification-empty">
+                Không có tố cáo người dùng nào đang chờ xử lý.
+              </div>
+            )}
+          </section>
+          <section className="admin-table">
+            <div>
+              <h2>Báo cáo đang chờ xử lý</h2>
+            </div>
+            {overview.recentReports.length ? (
+              <table>
+                <thead>
+                  <tr>
+                    <th>Sản phẩm</th>
+                    <th>Lý do</th>
+                    <th>Người gửi</th>
+                    <th>Thời gian</th>
+                    <th>Trạng thái</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {overview.recentReports.map((report) => (
+                    <tr key={report.id}>
+                      <td>{report.listing.title}</td>
+                      <td>{report.reason}</td>
+                      <td>
+                        <span className="identity-name-line">
+                          <Link href={`/users/${report.reporter.id}`}>
+                            {report.reporter.displayName}
+                          </Link>
+                          <AdminBadge role={report.reporter.role} />
+                        </span>
+                      </td>
+                      <td>{relativeListingTime(report.createdAt)}</td>
+                      <td>
+                        <span
+                          className={`status-badge ${report.status === "OPEN" ? "warning" : ""}`}
+                        >
+                          {report.status === "OPEN" ? "Chưa xem" : "Đang xem"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="notification-empty">
+                Không có báo cáo nào đang chờ xử lý.
+              </div>
+            )}
+          </section>
+        </>
+      ) : (
+        <div className="notification-empty">
+          Không thể tải dữ liệu quản trị.
+        </div>
+      )}
+    </main>
+  );
+}

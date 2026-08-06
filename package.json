@@ -1,0 +1,32 @@
+{
+  "name": "tws-community-marketplace",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.9.0",
+  "scripts": {
+    "dev": "pnpm --parallel --filter @tws/web --filter @tws/api dev",
+    "dev:web": "pnpm --filter @tws/web dev",
+    "dev:api": "pnpm --filter @tws/api dev",
+    "services:start": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/start-all.ps1",
+    "services:stop": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/stop-all.ps1",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint",
+    "format": "prettier --write .",
+    "db:generate": "pnpm --filter @tws/api prisma:generate",
+    "db:migrate": "pnpm --filter @tws/api prisma:migrate",
+    "db:seed": "pnpm --filter @tws/api prisma:seed",
+    "db:studio": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/prisma-studio.ps1",
+    "test:reputation": "pnpm --filter @tws/api test:reputation",
+    "test:inventory": "pnpm --filter @tws/api test:inventory",
+    "test:demo-flow": "pnpm --filter @tws/api test:demo-flow",
+    "test:security": "pnpm --filter @tws/api test:security && pnpm --filter @tws/web test:security",
+    "admin:create": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/create-admin.ps1",
+    "strix": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/strix.ps1",
+    "strix:status": "pnpm strix auth status",
+    "strix:auth": "pnpm strix auth login chatgpt --manual"
+  },
+  "devDependencies": {
+    "prettier": "3.6.2"
+  }
+}
