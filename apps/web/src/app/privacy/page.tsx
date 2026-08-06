@@ -21,12 +21,18 @@ export default function PrivacyPage() {
       </p>
       <h2>Cam kết về thông tin liên hệ</h2>
       <p>
-        Nền tảng không bán số điện thoại hoặc URL Facebook, không cung cấp chúng
-        cho nhà quảng cáo và không chia sẻ ra ngoài mục đích vận hành
-        marketplace, bảo vệ thành viên hoặc tuân thủ yêu cầu pháp luật hợp lệ.
-        Email OTP được chuyển qua nhà cung cấp gửi thư Resend với tên người gửi
-        taskflow-planner; Resend không được gửi số điện thoại hoặc URL Facebook
-        trong nội dung OTP.
+        TWS Community Market cam kết áp dụng biện pháp hợp lý để bảo vệ số điện
+        thoại và URL Facebook, không bán cho nhà quảng cáo và không chia sẻ
+        ngoài phạm vi cần thiết để vận hành marketplace, hỗ trợ an toàn hoặc đáp
+        ứng yêu cầu pháp luật hợp lệ. Quyền truy cập được giới hạn theo luồng
+        liên hệ giao dịch và vai trò quản trị.
+      </p>
+      <p>
+        Email OTP được gửi qua Resend với tên người gửi taskflow-planner. Nền
+        tảng chỉ chuyển địa chỉ email người nhận và nội dung OTP cần thiết cho
+        dịch vụ gửi thư; số điện thoại và URL Facebook không được đưa vào email
+        OTP. Nghĩa vụ của thành viên khi sử dụng thông tin của người khác được
+        quy định riêng trong Điều khoản sử dụng.
       </p>
     </main>
   );

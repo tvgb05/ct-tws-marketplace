@@ -67,7 +67,7 @@ pnpm dev:web
 
 ## Tài khoản quản trị
 
-Admin dùng email và mật khẩu tại `http://localhost:3000/admin/login`, hoàn
+Admin dùng email và mật khẩu tại `http://localhost:3000/login` bằng tab Admin, hoàn
 toàn tách khỏi Facebook Login. Mật khẩu được băm trước khi lưu và cookie phiên
 đăng nhập là HTTP-only.
 
@@ -94,7 +94,7 @@ và chữ số, đồng thời ghi lại sự kiện đổi mật khẩu trong a
 các phiên admin cũ bị vô hiệu hóa và admin cần đăng nhập lại.
 
 Hai tài khoản thành viên demo có thể được cấu hình bằng các nhóm biến
-`SEED_DEMO_USER_1_*` và `SEED_DEMO_USER_2_*`. Chúng đăng nhập tại `/admin/login`
+`SEED_DEMO_USER_1_*` và `SEED_DEMO_USER_2_*`. Chúng đăng nhập tại `/login`
 bằng email/mật khẩu nhưng luôn giữ role `USER`, được chuyển về marketplace và
 không có quyền truy cập dashboard hay API quản trị. Seed chạy lặp lại an toàn và
 không ghi đè mật khẩu đã tồn tại. Thông tin liên hệ của tài khoản demo là dữ liệu
@@ -117,8 +117,9 @@ giả lập, không đại diện cho người dùng thật và không nên bậ
 
 Google chỉ được dùng khi trả về email đã xác minh. OTP email hết hạn sau 10
 phút, tối đa 5 lần nhập sai, chỉ dùng một lần và được lưu dưới dạng bản băm.
-Người dùng phải đồng ý cam kết sử dụng số điện thoại và URL Facebook cho trao
-đổi/giao dịch; thời điểm và phiên bản cam kết được lưu cùng tài khoản.
+Người dùng xác nhận đã đọc cam kết bảo vệ số điện thoại và URL Facebook của nền
+tảng; thời điểm và phiên bản xác nhận được lưu cùng tài khoản. Nghĩa vụ sử dụng
+thông tin liên hệ của thành viên khác được quy định trong Điều khoản sử dụng.
 Facebook OAuth cũ vẫn còn ở backend để không làm mất liên kết của tài khoản đã
 tồn tại, nhưng không còn là lựa chọn đăng nhập chính.
 
@@ -126,7 +127,7 @@ tồn tại, nhưng không còn là lựa chọn đăng nhập chính.
 
 - Marketplace responsive, tìm kiếm, lọc danh mục/tình trạng, sắp xếp và trang chi tiết.
 - Google OAuth và email OTP do backend quản lý; application session không lưu trong localStorage. Người dùng có thể chọn cookie HTTP-only duy trì đăng nhập trong 30 ngày; nếu không chọn, cookie chỉ tồn tại theo phiên trình duyệt và JWT hết hạn sau 15 phút.
-- Cổng admin riêng dùng email/mật khẩu, giới hạn số lần thử đăng nhập và cho phép admin đang hoạt động cấp thêm tài khoản admin. Admin không đăng nhập qua Facebook.
+- Tab admin trên trang đăng nhập chung dùng email/mật khẩu, giới hạn số lần thử và cho phép admin đang hoạt động cấp thêm tài khoản admin. Admin không đăng nhập qua Google hoặc OTP.
 - Sau giao dịch hoàn tất, người mua và người bán có thể đánh giá đối phương một lần với thang 1–5 sao. Hồ sơ thành viên công khai số giao dịch bán hoàn tất, điểm trung bình và các đánh giá gần đây gắn với bài đăng thực tế.
 - Thành viên có thể tố cáo tài khoản khác; phiếu tố cáo được lưu riêng và hiển thị trong dashboard admin. Khi xác nhận vi phạm, admin có thể khóa riêng quyền đăng bài mà không khóa đăng nhập, ghi lý do xử lý và cấp lại quyền sau đó. Mỗi thay đổi đều tạo thông báo chưa đọc cho thành viên và audit log cho admin.
 - Prisma domain model cho user, auth identity, listing, image, favorite, report, mediation, notification và audit log.

@@ -50,15 +50,14 @@ const faqGroups = [
           "Google cung cấp mã tài khoản theo ứng dụng, tên hiển thị, email và ảnh đại diện. Với đăng nhập email, website chỉ xác nhận quyền sở hữu email bằng mã OTP dùng một lần; website không nhận mật khẩu Google hoặc mật khẩu email của bạn.",
       },
       {
-        question:
-          "Số điện thoại và đường dẫn Facebook có được xác minh không?",
+        question: "Số điện thoại và đường dẫn Facebook có được xác minh không?",
         answer:
           "URL Facebook và số điện thoại do người dùng nhập tay chỉ được kiểm tra định dạng, không được Google, Meta hoặc website tự động xác minh. Hãy đối chiếu thông tin và nhờ admin hỗ trợ nếu có dấu hiệu giả mạo.",
       },
       {
         question: "Khi nào thông tin liên hệ của tôi được hiển thị?",
         answer:
-          "Số điện thoại và URL Facebook chỉ được trả về cho thành viên đã đăng nhập khi họ chủ động bắt đầu liên hệ mua bán, và cho admin khi cần hỗ trợ an toàn. Nền tảng không bán thông tin này, không cung cấp cho nhà quảng cáo và không đưa chúng vào email OTP.",
+          "Số điện thoại và URL Facebook chỉ được trả về cho thành viên đã đăng nhập khi họ chủ động bắt đầu liên hệ mua bán, và cho admin khi cần hỗ trợ an toàn. TWS Community Market cam kết bảo vệ, không bán cho nhà quảng cáo và không đưa các thông tin này vào email OTP. Thành viên nhận được thông tin phải tuân thủ Điều khoản sử dụng.",
       },
       {
         question: "Vì sao email OTP mang tên taskflow-planner?",

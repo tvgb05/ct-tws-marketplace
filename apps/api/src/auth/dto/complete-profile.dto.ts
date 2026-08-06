@@ -12,7 +12,7 @@ import {
 export class CompleteProfileDto {
   @IsBoolean()
   @Equals(true, {
-    message: "Bạn cần đồng ý cam kết sử dụng thông tin liên hệ",
+    message: "Bạn cần xác nhận đã đọc cam kết bảo vệ thông tin liên hệ",
   })
   contactPrivacyAccepted!: boolean;
 

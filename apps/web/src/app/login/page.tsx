@@ -20,18 +20,23 @@ const apiOrigin =
 const apiUrl = `${apiOrigin}/api/v1`;
 
 function apiErrorMessage(body: unknown, fallback: string) {
-  if (!body || typeof body !== "object" || !("message" in body)) return fallback;
+  if (!body || typeof body !== "object" || !("message" in body))
+    return fallback;
   const message = (body as { message?: string | string[] }).message;
-  return Array.isArray(message) ? (message[0] ?? fallback) : (message ?? fallback);
+  return Array.isArray(message)
+    ? (message[0] ?? fallback)
+    : (message ?? fallback);
 }
 
 export default function LoginPage() {
   const { user, loading } = useAuth();
+  const [loginMode, setLoginMode] = useState<"member" | "admin">("member");
   const [rememberForThirtyDays, setRememberForThirtyDays] = useState(false);
   const [emailStep, setEmailStep] = useState<"request" | "verify">("request");
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
+  const [password, setPassword] = useState("");
   const [contactPrivacyAccepted, setContactPrivacyAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
@@ -48,6 +53,14 @@ export default function LoginPage() {
   const nextPath = requestedPath?.startsWith("/")
     ? requestedPath
     : "/marketplace";
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("mode") === "admin") {
+      // Preserve old /admin/login bookmarks while keeping one login page.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLoginMode("admin");
+    }
+  }, []);
 
   useEffect(() => {
     if (!loading && user) {
@@ -134,13 +147,62 @@ export default function LoginPage() {
       );
     } catch (caught) {
       setError(
-        caught instanceof Error
-          ? caught.message
-          : "Không thể xác nhận mã OTP.",
+        caught instanceof Error ? caught.message : "Không thể xác nhận mã OTP.",
       );
     } finally {
       setSubmitting(false);
     }
+  }
+
+  async function loginWithPassword(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSubmitting(true);
+    setError("");
+    setMessage("");
+    try {
+      const response = await fetch(`${apiUrl}/auth/admin/login`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          password,
+          remember: rememberForThirtyDays,
+        }),
+      });
+      const body = (await response.json().catch(() => null)) as {
+        role?: "USER" | "ADMIN";
+      } | null;
+      if (!response.ok) {
+        throw new Error(
+          response.status === 429
+            ? "Bạn đã thử quá nhiều lần. Vui lòng đợi một phút rồi thử lại."
+            : apiErrorMessage(body, "Email hoặc mật khẩu không chính xác."),
+        );
+      }
+      window.location.assign(body?.role === "ADMIN" ? "/admin" : nextPath);
+    } catch (caught) {
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : "Không thể kết nối máy chủ. Vui lòng thử lại.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  function changeMode(mode: "member" | "admin") {
+    setLoginMode(mode);
+    const url = new URL(window.location.href);
+    if (mode === "admin") url.searchParams.set("mode", "admin");
+    else url.searchParams.delete("mode");
+    window.history.replaceState(null, "", `${url.pathname}${url.search}`);
+    setEmailStep("request");
+    setCode("");
+    setPassword("");
+    setMessage("");
+    setError("");
   }
 
   return (
@@ -171,14 +233,39 @@ export default function LoginPage() {
             <em>mua bán tử tế.</em>
           </h1>
           <p>
-            Đăng nhập nhanh bằng Google hoặc nhận mã xác nhận qua email. Chúng
-            tôi không yêu cầu mật khẩu email của bạn.
+            {loginMode === "member"
+              ? "Đăng nhập nhanh bằng Google hoặc nhận mã xác nhận qua email. Chúng tôi không yêu cầu mật khẩu email của bạn."
+              : "Admin và tài khoản demo nội bộ đăng nhập bằng email cùng mật khẩu được cấp."}
           </p>
+          <div
+            className="auth-mode-switch"
+            role="tablist"
+            aria-label="Loại tài khoản"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={loginMode === "member"}
+              className={loginMode === "member" ? "active" : ""}
+              onClick={() => changeMode("member")}
+            >
+              <Mail size={16} /> Thành viên
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={loginMode === "admin"}
+              className={loginMode === "admin" ? "active" : ""}
+              onClick={() => changeMode("admin")}
+            >
+              <LockKeyhole size={16} /> Admin
+            </button>
+          </div>
           {loading ? (
             <div className="auth-loading">
               <LoaderCircle className="spin" /> Đang kiểm tra phiên đăng nhập…
             </div>
-          ) : (
+          ) : loginMode === "member" ? (
             <>
               {methods?.google ? (
                 <a
@@ -210,105 +297,116 @@ export default function LoginPage() {
                   </p>
                 )}
                 <fieldset disabled={!methods?.emailOtp || submitting}>
-                {emailStep === "request" ? (
-                  <>
-                    <label>
-                      <span>Tên hiển thị</span>
-                      <span className="email-otp-input">
-                        <ShieldCheck size={16} />
+                  {emailStep === "request" ? (
+                    <>
+                      <label>
+                        <span>Tên hiển thị</span>
+                        <span className="email-otp-input">
+                          <ShieldCheck size={16} />
+                          <input
+                            value={displayName}
+                            onChange={(event) =>
+                              setDisplayName(event.target.value)
+                            }
+                            minLength={2}
+                            maxLength={60}
+                            autoComplete="name"
+                            placeholder="Tên mọi người sẽ thấy"
+                            required
+                          />
+                        </span>
+                      </label>
+                      <label>
+                        <span>Email</span>
+                        <span className="email-otp-input">
+                          <Mail size={16} />
+                          <input
+                            type="email"
+                            value={email}
+                            onChange={(event) => setEmail(event.target.value)}
+                            maxLength={254}
+                            autoComplete="email"
+                            placeholder="ban@example.com"
+                            required
+                          />
+                        </span>
+                      </label>
+                      <label className="auth-contact-consent">
                         <input
-                          value={displayName}
-                          onChange={(event) => setDisplayName(event.target.value)}
-                          minLength={2}
-                          maxLength={60}
-                          autoComplete="name"
-                          placeholder="Tên mọi người sẽ thấy"
-                          required
-                        />
-                      </span>
-                    </label>
-                    <label>
-                      <span>Email</span>
-                      <span className="email-otp-input">
-                        <Mail size={16} />
-                        <input
-                          type="email"
-                          value={email}
-                          onChange={(event) => setEmail(event.target.value)}
-                          maxLength={254}
-                          autoComplete="email"
-                          placeholder="ban@example.com"
-                          required
-                        />
-                      </span>
-                    </label>
-                    <label className="auth-contact-consent">
-                      <input
-                        type="checkbox"
-                        checked={contactPrivacyAccepted}
-                        onChange={(event) =>
-                          setContactPrivacyAccepted(event.target.checked)
-                        }
-                        required
-                      />
-                      <span>
-                        <strong>Cam kết sử dụng thông tin liên hệ</strong>
-                        <small>
-                          Tôi đồng ý số điện thoại và URL Facebook chỉ được dùng
-                          để thành viên trao đổi, thực hiện giao dịch và hỗ trợ an
-                          toàn; không bán hoặc chia sẻ cho quảng cáo hay bên thứ
-                          ba ngoài mục đích vận hành marketplace.
-                        </small>
-                      </span>
-                    </label>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      type="button"
-                      className="email-otp-back"
-                      onClick={() => {
-                        setEmailStep("request");
-                        setCode("");
-                        setError("");
-                        setMessage("");
-                      }}
-                    >
-                      <ArrowLeft size={14} /> Đổi email
-                    </button>
-                    <label>
-                      <span>Mã OTP gửi tới {email.trim().toLowerCase()}</span>
-                      <span className="email-otp-input code">
-                        <KeyRound size={16} />
-                        <input
-                          value={code}
+                          type="checkbox"
+                          checked={contactPrivacyAccepted}
                           onChange={(event) =>
-                            setCode(event.target.value.replace(/\D/g, "").slice(0, 6))
+                            setContactPrivacyAccepted(event.target.checked)
                           }
-                          inputMode="numeric"
-                          autoComplete="one-time-code"
-                          pattern="[0-9]{6}"
-                          placeholder="000000"
                           required
-                          autoFocus
                         />
-                      </span>
-                    </label>
-                  </>
-                )}
-                <button className="email-otp-submit" disabled={submitting}>
-                  {submitting ? (
-                    <LoaderCircle className="spin" size={17} />
-                  ) : emailStep === "request" ? (
-                    <Mail size={17} />
+                        <span>
+                          <strong>Cam kết bảo vệ thông tin từ nền tảng</strong>
+                          <small>
+                            TWS Community Market cam kết bảo vệ số điện thoại và
+                            URL Facebook, chỉ cung cấp trong luồng liên hệ giao
+                            dịch hoặc hỗ trợ an toàn; không bán cho nhà quảng
+                            cáo hay chia sẻ ngoài mục đích vận hành và yêu cầu
+                            pháp luật hợp lệ. Tôi xác nhận đã đọc cam kết này.
+                          </small>
+                        </span>
+                      </label>
+                    </>
                   ) : (
-                    <KeyRound size={17} />
+                    <>
+                      <button
+                        type="button"
+                        className="email-otp-back"
+                        onClick={() => {
+                          setEmailStep("request");
+                          setCode("");
+                          setError("");
+                          setMessage("");
+                        }}
+                      >
+                        <ArrowLeft size={14} /> Đổi email
+                      </button>
+                      <label>
+                        <span>Mã OTP gửi tới {email.trim().toLowerCase()}</span>
+                        <span className="email-otp-input code">
+                          <KeyRound size={16} />
+                          <input
+                            value={code}
+                            onChange={(event) =>
+                              setCode(
+                                event.target.value
+                                  .replace(/\D/g, "")
+                                  .slice(0, 6),
+                              )
+                            }
+                            inputMode="numeric"
+                            autoComplete="one-time-code"
+                            pattern="[0-9]{6}"
+                            placeholder="000000"
+                            required
+                            autoFocus
+                          />
+                        </span>
+                      </label>
+                    </>
                   )}
-                  {emailStep === "request" ? "Gửi mã đăng nhập" : "Xác nhận mã"}
-                </button>
+                  <button className="email-otp-submit" disabled={submitting}>
+                    {submitting ? (
+                      <LoaderCircle className="spin" size={17} />
+                    ) : emailStep === "request" ? (
+                      <Mail size={17} />
+                    ) : (
+                      <KeyRound size={17} />
+                    )}
+                    {emailStep === "request"
+                      ? "Gửi mã đăng nhập"
+                      : "Xác nhận mã"}
+                  </button>
                 </fieldset>
               </form>
-              {message && <p className="email-otp-message success">{message}</p>}
+              {message && (
+                <p className="email-otp-message success">{message}</p>
+              )}
               {error && <p className="email-otp-message error">{error}</p>}
               <label className="remember-login">
                 <input
@@ -323,24 +421,88 @@ export default function LoginPage() {
                   <small>Chỉ nên chọn trên thiết bị cá nhân của bạn.</small>
                 </span>
               </label>
-              <Link href="/admin/login" className="admin-login-link">
-                <LockKeyhole size={17} /> Đăng nhập dành cho admin
-              </Link>
             </>
+          ) : (
+            <form
+              className="admin-login-form unified-admin-login"
+              onSubmit={loginWithPassword}
+            >
+              <label className="admin-form-field">
+                <span>Email đăng nhập</span>
+                <input
+                  type="email"
+                  autoComplete="username"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  maxLength={254}
+                  placeholder="admin@example.com"
+                  required
+                />
+              </label>
+              <label className="admin-form-field">
+                <span>Mật khẩu</span>
+                <input
+                  type="password"
+                  autoComplete="current-password"
+                  minLength={8}
+                  maxLength={128}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  required
+                />
+              </label>
+              <label className="remember-login admin-remember-login">
+                <input
+                  type="checkbox"
+                  checked={rememberForThirtyDays}
+                  onChange={(event) =>
+                    setRememberForThirtyDays(event.target.checked)
+                  }
+                />
+                <span>
+                  <strong>Duy trì đăng nhập trong 30 ngày</strong>
+                  <small>Chỉ nên chọn trên thiết bị cá nhân an toàn.</small>
+                </span>
+              </label>
+              {error && <div className="admin-auth-error">{error}</div>}
+              <button
+                type="submit"
+                className="admin-login-submit"
+                disabled={submitting}
+              >
+                {submitting ? (
+                  <LoaderCircle className="spin" size={18} />
+                ) : (
+                  <LockKeyhole size={18} />
+                )}
+                {submitting ? "Đang đăng nhập…" : "Đăng nhập"}
+              </button>
+            </form>
           )}
           <div className="auth-security">
             <ShieldCheck size={18} />
             <span>
-              <strong>Mã OTP chỉ dùng một lần</strong>
-              <small>
-                Mã từ taskflow-planner hết hạn sau 10 phút. Nếu chưa thấy, hãy
-                kiểm tra cả Spam/Thư rác.
-              </small>
+              <strong>
+                {loginMode === "member"
+                  ? "Mã OTP chỉ dùng một lần"
+                  : "Phiên quản trị được bảo vệ"}
+              </strong>
+              {loginMode === "member" ? (
+                <small>
+                  Mã từ taskflow-planner hết hạn sau 10 phút. Nếu chưa thấy, hãy
+                  kiểm tra cả Spam/Thư rác.
+                </small>
+              ) : (
+                <small>
+                  Mật khẩu được băm và phiên nằm trong cookie HTTP-only.
+                </small>
+              )}
             </span>
           </div>
           <p className="auth-legal">
-            Bằng việc tiếp tục, bạn đồng ý với <Link href="/terms">Điều khoản</Link>{" "}
-            và <Link href="/privacy">Chính sách quyền riêng tư</Link>.
+            Bằng việc tiếp tục, bạn đồng ý với{" "}
+            <Link href="/terms">Điều khoản</Link> và{" "}
+            <Link href="/privacy">Chính sách quyền riêng tư</Link>.
           </p>
         </div>
       </div>

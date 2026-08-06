@@ -1714,7 +1714,9 @@ html[data-theme="dark"] .theme-toggle .theme-icon-sun {
   display: grid;
   place-items: center;
   color: #4285f4;
-  font: 700 14px/1 Arial, sans-serif;
+  font:
+    700 14px/1 Arial,
+    sans-serif;
 }
 .email-otp-form {
   display: grid;
@@ -1770,6 +1772,34 @@ html[data-theme="dark"] .theme-toggle .theme-icon-sun {
   color: #895e20;
   font-size: 9px;
   line-height: 1.5;
+}
+.auth-mode-switch {
+  margin: 18px 0;
+  padding: 4px;
+  border: 1px solid #d6dcd9;
+  background: #f1f4f0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+.auth-mode-switch button {
+  min-height: 40px;
+  border: 0;
+  background: transparent;
+  color: #63716b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.auth-mode-switch button.active {
+  background: white;
+  color: var(--pine);
+  box-shadow: 0 2px 8px rgba(20, 55, 44, 0.1);
 }
 .email-otp-input {
   min-height: 43px;
@@ -1967,6 +1997,12 @@ html[data-theme="dark"] .theme-toggle .theme-icon-sun {
 }
 .admin-login-form > p {
   margin-bottom: 24px;
+}
+.unified-admin-login {
+  margin-top: 4px;
+}
+.unified-admin-login .admin-login-submit {
+  margin-bottom: 0;
 }
 .admin-form-field {
   display: grid;
@@ -4837,6 +4873,17 @@ html[data-theme="dark"] .admin-confirm-list article {
 }
 html[data-theme="dark"] .auth-page {
   background: #111b2b;
+}
+html[data-theme="dark"] .auth-mode-switch {
+  background: #121e30;
+  border-color: #35445a;
+}
+html[data-theme="dark"] .auth-mode-switch button {
+  color: #aebaca;
+}
+html[data-theme="dark"] .auth-mode-switch button.active {
+  background: #26364d;
+  color: #dce8df;
 }
 html[data-theme="dark"] .google-login-button,
 html[data-theme="dark"] .email-otp-input,

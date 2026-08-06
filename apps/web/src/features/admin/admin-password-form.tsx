@@ -44,7 +44,10 @@ export function AdminPasswordForm() {
       setNewPassword("");
       setConfirmation("");
       setSuccess("Đã đổi mật khẩu. Bạn sẽ được chuyển về trang đăng nhập.");
-      window.setTimeout(() => window.location.assign("/admin/login"), 1200);
+      window.setTimeout(
+        () => window.location.assign("/login?mode=admin"),
+        1200,
+      );
     } catch {
       setError("Không thể kết nối máy chủ. Vui lòng thử lại.");
     } finally {

@@ -43,8 +43,7 @@ export default function CompleteProfilePage() {
       contactPrivacyAccepted: boolean;
     } = {
       phoneNumber,
-      contactPrivacyAccepted:
-        formData.get("contactPrivacyAccepted") === "on",
+      contactPrivacyAccepted: formData.get("contactPrivacyAccepted") === "on",
     };
     if (!existingFacebookProfileUrl)
       requestBody.facebookProfileUrl = facebookProfileUrl;
@@ -157,8 +156,8 @@ export default function CompleteProfilePage() {
                 placeholder="https://www.facebook.com/ten-cua-ban"
               />
               <small>
-                Google và đăng nhập email không cung cấp đường dẫn Facebook.
-                Hãy mở trang cá nhân Facebook, sao chép URL rồi dán vào đây.
+                Google và đăng nhập email không cung cấp đường dẫn Facebook. Hãy
+                mở trang cá nhân Facebook, sao chép URL rồi dán vào đây.
               </small>
             </label>
           )}
@@ -170,12 +169,13 @@ export default function CompleteProfilePage() {
               defaultChecked={user.contactPrivacyAccepted}
             />
             <span>
-              <strong>Cam kết bảo vệ thông tin liên hệ</strong>
+              <strong>Cam kết bảo vệ thông tin từ nền tảng</strong>
               <small>
-                Tôi đồng ý số điện thoại và URL Facebook chỉ được dùng để các
-                thành viên trao đổi, giao dịch và để admin hỗ trợ an toàn. Nền
-                tảng không bán hoặc chia sẻ các thông tin này cho quảng cáo hay
-                bên thứ ba ngoài mục đích vận hành marketplace.
+                TWS Community Market cam kết bảo vệ số điện thoại và URL
+                Facebook, chỉ cung cấp trong luồng liên hệ giao dịch hoặc khi
+                admin hỗ trợ an toàn; không bán cho nhà quảng cáo hay chia sẻ
+                ngoài mục đích vận hành và yêu cầu pháp luật hợp lệ. Tôi xác
+                nhận đã đọc cam kết này.
               </small>
             </span>
           </label>
