@@ -18,6 +18,7 @@ export type AuthUser = {
   phoneNumber: string | null;
   facebookProfileUrl: string | null;
   profileCompleted: boolean;
+  contactPrivacyAccepted: boolean;
   role: "USER" | "ADMIN";
   joinedAt: string;
   canPostListings: boolean;

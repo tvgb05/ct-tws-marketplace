@@ -14,6 +14,7 @@ import { PrismaService } from "../prisma/prisma.service";
 import { AdminLoginDto } from "./dto/admin-login.dto";
 import { ChangeAdminPasswordDto } from "./dto/change-admin-password.dto";
 import { CompleteProfileDto } from "./dto/complete-profile.dto";
+import { CONTACT_PRIVACY_POLICY_VERSION } from "./contact-privacy";
 
 export interface FacebookProfile {
   providerUserId: string;
@@ -70,6 +71,7 @@ export class AuthService {
   loginWithEmail(
     email: string,
     displayName: string,
+    contactPrivacyAcceptedAt: Date,
     rememberForThirtyDays = false,
   ) {
     return this.loginWithIdentity(
@@ -80,6 +82,8 @@ export class AuthService {
         email,
       },
       rememberForThirtyDays,
+      undefined,
+      contactPrivacyAcceptedAt,
     );
   }
 
@@ -88,6 +92,7 @@ export class AuthService {
     profile: LoginProfile,
     rememberForThirtyDays: boolean,
     facebookProfileUrl?: string,
+    contactPrivacyAcceptedAt?: Date,
   ) {
     const identity = await this.prisma.authIdentity.findUnique({
       where: {
@@ -135,6 +140,12 @@ export class AuthService {
         : {}),
       email: profile.email,
       ...(facebookProfileUrl ? { facebookProfileUrl } : {}),
+      ...(contactPrivacyAcceptedAt
+        ? {
+            contactPrivacyAcceptedAt,
+            contactPrivacyVersion: CONTACT_PRIVACY_POLICY_VERSION,
+          }
+        : {}),
       lastLoginAt: new Date(),
     };
     const user = identity
@@ -158,6 +169,10 @@ export class AuthService {
               avatarUrl: profile.avatarUrl,
               email: profile.email,
               facebookProfileUrl,
+              contactPrivacyAcceptedAt,
+              contactPrivacyVersion: contactPrivacyAcceptedAt
+                ? CONTACT_PRIVACY_POLICY_VERSION
+                : undefined,
               lastLoginAt: new Date(),
               authIdentities: {
                 create: {
@@ -339,6 +354,8 @@ export class AuthService {
         phoneNumber: input.phoneNumber,
         facebookProfileUrl,
         profileCompletedAt: new Date(),
+        contactPrivacyAcceptedAt: new Date(),
+        contactPrivacyVersion: CONTACT_PRIVACY_POLICY_VERSION,
       },
     });
   }

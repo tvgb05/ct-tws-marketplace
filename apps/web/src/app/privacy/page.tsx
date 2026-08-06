@@ -15,8 +15,18 @@ export default function PrivacyPage() {
       <h2>Mục đích sử dụng</h2>
       <p>
         Dữ liệu giúp duy trì tài khoản, hiển thị người bán, xử lý báo cáo và hỗ
-        trợ giao dịch. Thông tin liên hệ chỉ được hiển thị cho thành viên đã
-        đăng nhập khi họ chủ động yêu cầu.
+        trợ giao dịch. Số điện thoại và URL Facebook chỉ được hiển thị cho thành
+        viên đã đăng nhập khi họ chủ động bắt đầu liên hệ mua bán, và cho admin
+        khi cần xử lý an toàn, báo cáo hoặc trung gian.
+      </p>
+      <h2>Cam kết về thông tin liên hệ</h2>
+      <p>
+        Nền tảng không bán số điện thoại hoặc URL Facebook, không cung cấp chúng
+        cho nhà quảng cáo và không chia sẻ ra ngoài mục đích vận hành
+        marketplace, bảo vệ thành viên hoặc tuân thủ yêu cầu pháp luật hợp lệ.
+        Email OTP được chuyển qua nhà cung cấp gửi thư Resend với tên người gửi
+        taskflow-planner; Resend không được gửi số điện thoại hoặc URL Facebook
+        trong nội dung OTP.
       </p>
     </main>
   );

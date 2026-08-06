@@ -1,5 +1,7 @@
 import { Transform } from "class-transformer";
 import {
+  Equals,
+  IsBoolean,
   IsOptional,
   IsString,
   IsUrl,
@@ -8,6 +10,12 @@ import {
 } from "class-validator";
 
 export class CompleteProfileDto {
+  @IsBoolean()
+  @Equals(true, {
+    message: "Bạn cần đồng ý cam kết sử dụng thông tin liên hệ",
+  })
+  contactPrivacyAccepted!: boolean;
+
   @Transform(({ value }: { value: unknown }) =>
     String(value ?? "").replace(/[\s().-]/g, ""),
   )

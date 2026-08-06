@@ -32,6 +32,7 @@ export default function LoginPage() {
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
+  const [contactPrivacyAccepted, setContactPrivacyAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -81,7 +82,7 @@ export default function LoginPage() {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, contactPrivacyAccepted }),
       });
       const body = (await response.json().catch(() => null)) as {
         devCode?: string;
@@ -94,7 +95,7 @@ export default function LoginPage() {
       setMessage(
         body?.devCode
           ? `Môi trường phát triển: mã OTP là ${body.devCode}`
-          : `Đã gửi mã gồm 6 số tới ${email.trim().toLowerCase()}.`,
+          : `Đã gửi mã tới ${email.trim().toLowerCase()}. Hãy kiểm tra cả Hộp thư đến và Spam/Thư rác; người gửi hiển thị là taskflow-planner.`,
       );
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Không thể gửi mã.");
@@ -204,7 +205,7 @@ export default function LoginPage() {
                 {!methods?.emailOtp && (
                   <p className="auth-method-unavailable">
                     {methods
-                      ? "Email OTP chưa được cấu hình SMTP."
+                      ? "Email OTP chưa được cấu hình Resend hoặc SMTP."
                       : "Đang kiểm tra dịch vụ email…"}
                   </p>
                 )}
@@ -239,6 +240,25 @@ export default function LoginPage() {
                           placeholder="ban@example.com"
                           required
                         />
+                      </span>
+                    </label>
+                    <label className="auth-contact-consent">
+                      <input
+                        type="checkbox"
+                        checked={contactPrivacyAccepted}
+                        onChange={(event) =>
+                          setContactPrivacyAccepted(event.target.checked)
+                        }
+                        required
+                      />
+                      <span>
+                        <strong>Cam kết sử dụng thông tin liên hệ</strong>
+                        <small>
+                          Tôi đồng ý số điện thoại và URL Facebook chỉ được dùng
+                          để thành viên trao đổi, thực hiện giao dịch và hỗ trợ an
+                          toàn; không bán hoặc chia sẻ cho quảng cáo hay bên thứ
+                          ba ngoài mục đích vận hành marketplace.
+                        </small>
                       </span>
                     </label>
                   </>
@@ -312,7 +332,10 @@ export default function LoginPage() {
             <ShieldCheck size={18} />
             <span>
               <strong>Mã OTP chỉ dùng một lần</strong>
-              <small>Mã hết hạn sau 10 phút và không được lưu dưới dạng rõ.</small>
+              <small>
+                Mã từ taskflow-planner hết hạn sau 10 phút. Nếu chưa thấy, hãy
+                kiểm tra cả Spam/Thư rác.
+              </small>
             </span>
           </div>
           <p className="auth-legal">

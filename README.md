@@ -105,9 +105,11 @@ giả lập, không đại diện cho người dùng thật và không nên bậ
 1. Tạo OAuth 2.0 Client loại Web application trong Google Cloud Console.
 2. Thêm callback local: `http://localhost:4000/api/v1/auth/google/callback`.
 3. Điền `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` và `GOOGLE_CALLBACK_URL`.
-4. Để gửi OTP, cấu hình `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`,
-   `SMTP_PASSWORD` và `MAIL_FROM`. SMTP cổng 465 thường dùng
-   `SMTP_SECURE=true`; cổng 587 thường dùng `false`.
+4. Để gửi OTP bằng Resend, xác minh domain `taskflow-planner.site`, tạo API key
+   rồi cấu hình `RESEND_API_KEY` và
+   `RESEND_FROM=taskflow-planner <login@taskflow-planner.site>`. Nếu không có
+   Resend, hệ thống vẫn hỗ trợ fallback qua `SMTP_HOST`, `SMTP_PORT`,
+   `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASSWORD` và `MAIL_FROM`.
 5. Local có thể đặt `EMAIL_OTP_DEV_ECHO=true` để API trả mã kiểm thử mà không
    gửi mail. Production luôn bỏ qua chế độ này khi `NODE_ENV=production`.
 6. Với production, đặt đúng `WEB_URL`, bật `COOKIE_SECURE=true` và dùng một
@@ -115,6 +117,8 @@ giả lập, không đại diện cho người dùng thật và không nên bậ
 
 Google chỉ được dùng khi trả về email đã xác minh. OTP email hết hạn sau 10
 phút, tối đa 5 lần nhập sai, chỉ dùng một lần và được lưu dưới dạng bản băm.
+Người dùng phải đồng ý cam kết sử dụng số điện thoại và URL Facebook cho trao
+đổi/giao dịch; thời điểm và phiên bản cam kết được lưu cùng tài khoản.
 Facebook OAuth cũ vẫn còn ở backend để không làm mất liên kết của tài khoản đã
 tồn tại, nhưng không còn là lựa chọn đăng nhập chính.
 

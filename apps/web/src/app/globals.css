@@ -1737,6 +1737,32 @@ html[data-theme="dark"] .theme-toggle .theme-icon-sun {
   font-size: 9px;
   font-weight: 700;
 }
+.email-otp-form fieldset > .auth-contact-consent {
+  padding: 10px;
+  border: 1px solid #d8dfdb;
+  background: #f5f7f3;
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  cursor: pointer;
+}
+.auth-contact-consent > input {
+  width: 15px;
+  height: 15px;
+  margin: 1px 0 0;
+  flex: 0 0 auto;
+  accent-color: var(--pine);
+}
+.auth-contact-consent > span {
+  display: grid;
+  gap: 4px;
+}
+.auth-contact-consent small {
+  color: #67766f;
+  font-size: 8px;
+  font-weight: 500;
+  line-height: 1.55;
+}
 .auth-method-unavailable {
   margin: 0;
   padding: 8px 10px;
@@ -2115,6 +2141,34 @@ html[data-theme="dark"] .theme-toggle .theme-icon-sun {
 .profile-setup-form label small {
   color: #7c8999;
   font-size: 8px;
+}
+.profile-setup-form > .profile-contact-consent {
+  padding: 13px;
+  border: 1px solid #cdd9d2;
+  background: #f5f8f5;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+}
+.profile-setup-form > .profile-contact-consent > input {
+  width: 17px;
+  height: 17px;
+  margin: 1px 0 0;
+  padding: 0;
+  flex: 0 0 auto;
+  accent-color: var(--pine);
+}
+.profile-setup-form > .profile-contact-consent > span {
+  display: grid;
+  gap: 5px;
+}
+.profile-contact-consent strong {
+  color: var(--ink);
+  font-size: 10px;
+}
+.profile-contact-consent small {
+  line-height: 1.55;
 }
 .profile-privacy-note {
   padding: 14px;
@@ -4785,7 +4839,9 @@ html[data-theme="dark"] .auth-page {
   background: #111b2b;
 }
 html[data-theme="dark"] .google-login-button,
-html[data-theme="dark"] .email-otp-input {
+html[data-theme="dark"] .email-otp-input,
+html[data-theme="dark"] .auth-contact-consent,
+html[data-theme="dark"] .profile-setup-form > .profile-contact-consent {
   background: #162337;
   border-color: #35445a;
   color: #d8e0eb;
@@ -4797,6 +4853,10 @@ html[data-theme="dark"] .google-login-button:hover {
 html[data-theme="dark"] .email-otp-form fieldset > label,
 html[data-theme="dark"] .email-otp-input input {
   color: #d8e0eb;
+}
+html[data-theme="dark"] .auth-contact-consent small,
+html[data-theme="dark"] .profile-contact-consent small {
+  color: #aebaca;
 }
 html[data-theme="dark"] .auth-method-unavailable {
   background: #3e321f;

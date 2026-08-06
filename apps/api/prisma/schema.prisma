@@ -15,6 +15,8 @@ model User {
   phoneNumber              String?
   facebookProfileUrl       String?
   profileCompletedAt       DateTime?
+  contactPrivacyAcceptedAt DateTime?
+  contactPrivacyVersion    String?
   role                     UserRole           @default(USER)
   status                   UserStatus         @default(ACTIVE)
   contactType              ContactType?
@@ -81,6 +83,7 @@ model EmailLoginCode {
   attempts   Int       @default(0)
   expiresAt  DateTime
   consumedAt DateTime?
+  contactPrivacyAcceptedAt DateTime?
   createdAt  DateTime  @default(now())
 
   @@index([email, createdAt])

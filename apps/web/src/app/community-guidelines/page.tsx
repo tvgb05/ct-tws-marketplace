@@ -58,7 +58,12 @@ const faqGroups = [
       {
         question: "Khi nào thông tin liên hệ của tôi được hiển thị?",
         answer:
-          "Thông tin liên hệ chỉ được trả về cho thành viên đã đăng nhập khi họ chủ động bắt đầu một giao dịch trên bài đăng của bạn. Hãy xem Chính sách quyền riêng tư để biết thêm chi tiết.",
+          "Số điện thoại và URL Facebook chỉ được trả về cho thành viên đã đăng nhập khi họ chủ động bắt đầu liên hệ mua bán, và cho admin khi cần hỗ trợ an toàn. Nền tảng không bán thông tin này, không cung cấp cho nhà quảng cáo và không đưa chúng vào email OTP.",
+      },
+      {
+        question: "Vì sao email OTP mang tên taskflow-planner?",
+        answer:
+          "Website dùng hạ tầng email của dự án cũ taskflow-planner.site để gửi mã. Email hợp lệ có người gửi hiển thị là taskflow-planner, mã gồm 6 số và hết hạn sau 10 phút. Nếu chưa thấy, hãy kiểm tra cả Spam hoặc Thư rác.",
       },
     ],
   },

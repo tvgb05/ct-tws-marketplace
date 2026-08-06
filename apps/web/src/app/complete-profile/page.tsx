@@ -40,7 +40,12 @@ export default function CompleteProfilePage() {
     const requestBody: {
       phoneNumber: string;
       facebookProfileUrl?: string;
-    } = { phoneNumber };
+      contactPrivacyAccepted: boolean;
+    } = {
+      phoneNumber,
+      contactPrivacyAccepted:
+        formData.get("contactPrivacyAccepted") === "on",
+    };
     if (!existingFacebookProfileUrl)
       requestBody.facebookProfileUrl = facebookProfileUrl;
     setSaving(true);
@@ -157,6 +162,23 @@ export default function CompleteProfilePage() {
               </small>
             </label>
           )}
+          <label className="profile-contact-consent">
+            <input
+              required
+              type="checkbox"
+              name="contactPrivacyAccepted"
+              defaultChecked={user.contactPrivacyAccepted}
+            />
+            <span>
+              <strong>Cam kết bảo vệ thông tin liên hệ</strong>
+              <small>
+                Tôi đồng ý số điện thoại và URL Facebook chỉ được dùng để các
+                thành viên trao đổi, giao dịch và để admin hỗ trợ an toàn. Nền
+                tảng không bán hoặc chia sẻ các thông tin này cho quảng cáo hay
+                bên thứ ba ngoài mục đích vận hành marketplace.
+              </small>
+            </span>
+          </label>
           {error && (
             <p className="profile-setup-error" role="alert">
               {error}
@@ -167,8 +189,8 @@ export default function CompleteProfilePage() {
             <span>
               <strong>Chỉ dùng cho mục đích giao dịch</strong>
               <small>
-                Thông tin liên hệ chỉ được hiển thị trong luồng liên hệ mua bán
-                của marketplace.
+                Thông tin liên hệ chỉ được hiển thị cho thành viên đã đăng nhập
+                trong luồng liên hệ mua bán và admin khi cần hỗ trợ an toàn.
               </small>
             </span>
           </div>

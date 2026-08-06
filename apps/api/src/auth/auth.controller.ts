@@ -116,9 +116,7 @@ export class AuthController {
       rememberForThirtyDays,
     );
     this.setSessionCookie(response, result.token, rememberForThirtyDays);
-    return response.redirect(
-      this.loginDestination(result.user.profileCompletedAt),
-    );
+    return response.redirect(this.loginDestination(result.user));
   }
 
   @Post("email/request-code")
@@ -133,10 +131,11 @@ export class AuthController {
     @Body() input: VerifyEmailOtpDto,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const email = await this.emailOtp.verifyCode(input.email, input.code);
+    const verified = await this.emailOtp.verifyCode(input.email, input.code);
     const result = await this.auth.loginWithEmail(
-      email,
+      verified.email,
       input.displayName,
+      verified.contactPrivacyAcceptedAt,
       input.remember,
     );
     this.setSessionCookie(response, result.token, input.remember);
@@ -145,7 +144,7 @@ export class AuthController {
       displayName: result.user.displayName,
       email: result.user.email,
       role: result.user.role,
-      profileCompleted: Boolean(result.user.profileCompletedAt),
+      profileCompleted: this.profileCompleted(result.user),
     };
   }
 
@@ -168,12 +167,7 @@ export class AuthController {
     if (rememberForThirtyDays) sessionCookie.maxAge = 30 * 24 * 60 * 60 * 1000;
     response.cookie("tws_session", result.token, sessionCookie);
     response.clearCookie("tws_login_remember", this.cookieOptions());
-    const destination = result.user.profileCompletedAt
-      ? "/marketplace?login=success"
-      : "/complete-profile";
-    return response.redirect(
-      `${this.config.get("WEB_URL", "http://localhost:3000")}${destination}`,
-    );
+    return response.redirect(this.loginDestination(result.user));
   }
 
   @Get("me")
@@ -187,6 +181,7 @@ export class AuthController {
       phoneNumber,
       facebookProfileUrl,
       profileCompletedAt,
+      contactPrivacyAcceptedAt,
       role,
       joinedAt,
       canPostListings,
@@ -200,8 +195,12 @@ export class AuthController {
       phoneNumber,
       facebookProfileUrl,
       profileCompleted: Boolean(
-        profileCompletedAt && phoneNumber && facebookProfileUrl,
+        profileCompletedAt &&
+          phoneNumber &&
+          facebookProfileUrl &&
+          contactPrivacyAcceptedAt,
       ),
+      contactPrivacyAccepted: Boolean(contactPrivacyAcceptedAt),
       role,
       joinedAt,
       canPostListings,
@@ -275,8 +274,27 @@ export class AuthController {
     response.clearCookie("tws_login_remember", this.cookieOptions());
   }
 
-  private loginDestination(profileCompletedAt: Date | null) {
-    const destination = profileCompletedAt
+  private profileCompleted(user: {
+    profileCompletedAt: Date | null;
+    phoneNumber: string | null;
+    facebookProfileUrl: string | null;
+    contactPrivacyAcceptedAt: Date | null;
+  }) {
+    return Boolean(
+      user.profileCompletedAt &&
+        user.phoneNumber &&
+        user.facebookProfileUrl &&
+        user.contactPrivacyAcceptedAt,
+    );
+  }
+
+  private loginDestination(user: {
+    profileCompletedAt: Date | null;
+    phoneNumber: string | null;
+    facebookProfileUrl: string | null;
+    contactPrivacyAcceptedAt: Date | null;
+  }) {
+    const destination = this.profileCompleted(user)
       ? "/marketplace?login=success"
       : "/complete-profile";
     return `${this.config.get("WEB_URL", "http://localhost:3000")}${destination}`;
