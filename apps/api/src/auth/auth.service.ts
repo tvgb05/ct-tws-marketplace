@@ -3,6 +3,7 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
@@ -144,6 +145,45 @@ export class AuthService {
         status: true,
         createdAt: true,
       },
+    });
+  }
+
+  async revokeAdminAccount(credentialId: string, revokedById: string) {
+    const credential = await this.prisma.adminCredential.findUnique({
+      where: { id: credentialId },
+      include: { user: true },
+    });
+    if (!credential)
+      throw new NotFoundException("Không tìm thấy tài khoản admin");
+    if (credential.createdById === null)
+      throw new ForbiddenException("Tài khoản admin seed được bảo vệ");
+    if (credential.userId === revokedById)
+      throw new BadRequestException(
+        "Bạn không thể thu hồi tài khoản admin đang đăng nhập",
+      );
+
+    return this.prisma.$transaction(async (tx) => {
+      await tx.adminCredential.delete({ where: { id: credential.id } });
+      await tx.user.update({
+        where: { id: credential.userId },
+        data: { role: "USER", status: "SUSPENDED" },
+      });
+      await tx.auditLog.create({
+        data: {
+          actorId: revokedById,
+          action: "ADMIN_ACCOUNT_REVOKED",
+          entityType: "AdminCredential",
+          entityId: credential.id,
+          oldData: {
+            userId: credential.userId,
+            email: credential.email,
+            role: credential.user.role,
+            status: credential.user.status,
+          },
+          newData: { role: "USER", status: "SUSPENDED" },
+        },
+      });
+      return { success: true, id: credential.id };
     });
   }
 

@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   ForbiddenException,
   Get,
   NotFoundException,
@@ -301,5 +302,14 @@ export class AdminController {
   ) {
     if (user.role !== "ADMIN") throw new ForbiddenException();
     return this.auth.createAdminAccount(input, user.id);
+  }
+
+  @Delete("accounts/:credentialId")
+  revokeAccount(
+    @Param("credentialId") credentialId: string,
+    @CurrentUser() user: User,
+  ) {
+    if (user.role !== "ADMIN") throw new ForbiddenException();
+    return this.auth.revokeAdminAccount(credentialId, user.id);
   }
 }

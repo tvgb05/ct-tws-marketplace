@@ -2887,6 +2887,33 @@ html[data-theme="dark"] .theme-toggle .theme-icon-sun {
   display: grid;
   place-items: center;
 }
+.admin-account-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.admin-account-delete {
+  border: 1px solid #e3b8aa;
+  background: #fff7f3;
+  color: #99472e;
+  min-height: 32px;
+  padding: 7px 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: inherit;
+  font-size: 9px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.admin-account-delete:hover:not(:disabled) {
+  border-color: #c97a60;
+  background: #f9e8e1;
+}
+.admin-account-delete:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
 .admin-table {
   border: 1px solid #dfe0d9;
   overflow-x: auto;
@@ -4293,6 +4320,15 @@ html[data-theme="dark"] .admin-account-count {
   background: #1d3048;
   border-color: #35445a;
   color: #b9cce2;
+}
+html[data-theme="dark"] .admin-account-delete {
+  border-color: #71473b;
+  background: #352722;
+  color: #efb7a4;
+}
+html[data-theme="dark"] .admin-account-delete:hover:not(:disabled) {
+  border-color: #a76350;
+  background: #492f28;
 }
 html[data-theme="dark"] .remember-login strong,
 html[data-theme="dark"] .admin-form-field > span,

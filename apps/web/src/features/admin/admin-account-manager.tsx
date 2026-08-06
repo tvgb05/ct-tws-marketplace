@@ -5,9 +5,11 @@ import {
   KeyRound,
   LoaderCircle,
   ShieldCheck,
+  Trash2,
   UserPlus,
 } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useState } from "react";
+import { useAuth } from "@/lib/auth";
 
 const apiUrl =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
@@ -26,6 +28,7 @@ type AdminAccount = {
 };
 
 export function AdminAccountManager() {
+  const { user } = useAuth();
   const [accounts, setAccounts] = useState<AdminAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -34,6 +37,9 @@ export function AdminAccountManager() {
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [deletingAccountId, setDeletingAccountId] = useState<string | null>(
+    null,
+  );
 
   const loadAccounts = useCallback(async () => {
     try {
@@ -82,6 +88,41 @@ export function AdminAccountManager() {
       setError("Không thể kết nối máy chủ. Vui lòng thử lại.");
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function revokeAccount(account: AdminAccount) {
+    if (
+      !window.confirm(
+        `Thu hồi quyền admin của ${account.user.displayName} (${account.email})? Tài khoản này sẽ không thể đăng nhập lại.`,
+      )
+    )
+      return;
+
+    setDeletingAccountId(account.id);
+    setError("");
+    setMessage("");
+    try {
+      const response = await fetch(`${apiUrl}/admin/accounts/${account.id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const body = (await response.json().catch(() => null)) as {
+          message?: string | string[];
+        } | null;
+        const detail = Array.isArray(body?.message)
+          ? body.message[0]
+          : body?.message;
+        setError(detail ?? "Không thể thu hồi tài khoản admin.");
+        return;
+      }
+      setMessage(`Đã thu hồi quyền admin của ${account.user.displayName}.`);
+      await loadAccounts();
+    } catch {
+      setError("Không thể kết nối máy chủ. Vui lòng thử lại.");
+    } finally {
+      setDeletingAccountId(null);
     }
   }
 
@@ -166,9 +207,27 @@ export function AdminAccountManager() {
                   <strong>{account.user.displayName}</strong>
                   <small>{account.email}</small>
                 </span>
-                <b className="status-badge">
-                  {account.user.status === "ACTIVE" ? "Hoạt động" : "Bị khóa"}
-                </b>
+                <span className="admin-account-actions">
+                  {account.createdById === null ? (
+                    <b className="status-badge">Seed bảo vệ</b>
+                  ) : account.user.id === user?.id ? (
+                    <b className="status-badge">Tài khoản hiện tại</b>
+                  ) : (
+                    <button
+                      type="button"
+                      className="admin-account-delete"
+                      disabled={deletingAccountId === account.id}
+                      onClick={() => void revokeAccount(account)}
+                    >
+                      {deletingAccountId === account.id ? (
+                        <LoaderCircle className="spin" size={14} />
+                      ) : (
+                        <Trash2 size={14} />
+                      )}
+                      Thu hồi
+                    </button>
+                  )}
+                </span>
               </article>
             ))
           )}
