@@ -29,12 +29,19 @@ export default function CompleteProfilePage() {
   const { user, loading, refresh } = useAuth();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const existingFacebookProfileUrl = user?.facebookProfileUrl;
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const phoneNumber = String(formData.get("phoneNumber") ?? "");
     const facebookProfileUrl = String(formData.get("facebookProfileUrl") ?? "");
+    const requestBody: {
+      phoneNumber: string;
+      facebookProfileUrl?: string;
+    } = { phoneNumber };
+    if (!existingFacebookProfileUrl)
+      requestBody.facebookProfileUrl = facebookProfileUrl;
     setSaving(true);
     setError("");
     try {
@@ -42,7 +49,7 @@ export default function CompleteProfilePage() {
         method: "PATCH",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phoneNumber, facebookProfileUrl }),
+        body: JSON.stringify(requestBody),
       });
       if (!response.ok) {
         const body = (await response.json().catch(() => null)) as {
@@ -107,28 +114,40 @@ export default function CompleteProfilePage() {
               type="tel"
               inputMode="tel"
               autoComplete="tel"
-          name="phoneNumber"
-          defaultValue={user.phoneNumber ?? ""}
+              name="phoneNumber"
+              defaultValue={user.phoneNumber ?? ""}
               placeholder="Ví dụ: 0912345678"
             />
             <small>Chấp nhận số Việt Nam bắt đầu bằng 0 hoặc +84.</small>
           </label>
-          <label>
-            <span>
-              <Facebook size={16} /> Đường dẫn Facebook
-            </span>
-            <input
-              required
-              type="url"
-              inputMode="url"
-          name="facebookProfileUrl"
-          defaultValue={user.facebookProfileUrl ?? ""}
-              placeholder="https://www.facebook.com/ten-cua-ban"
-            />
-            <small>
-              Mở trang cá nhân Facebook, sao chép đường dẫn rồi dán vào đây.
-            </small>
-          </label>
+          {user.facebookProfileUrl ? (
+            <label>
+              <span>
+                <Facebook size={16} /> Đường dẫn Facebook
+              </span>
+              <input disabled type="url" value={user.facebookProfileUrl} />
+              <small>
+                Hồ sơ đã có đường dẫn Facebook, bạn không cần nhập lại.
+              </small>
+            </label>
+          ) : (
+            <label>
+              <span>
+                <Facebook size={16} /> Đường dẫn Facebook
+              </span>
+              <input
+                required
+                type="url"
+                inputMode="url"
+                name="facebookProfileUrl"
+                placeholder="https://www.facebook.com/ten-cua-ban"
+              />
+              <small>
+                Meta chưa trả về đường dẫn. Hãy mở trang cá nhân Facebook, sao
+                chép URL rồi dán vào đây.
+              </small>
+            </label>
+          )}
           {error && (
             <p className="profile-setup-error" role="alert">
               {error}

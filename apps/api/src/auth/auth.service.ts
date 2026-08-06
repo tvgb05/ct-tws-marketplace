@@ -19,6 +19,7 @@ export interface FacebookProfile {
   displayName: string;
   avatarUrl?: string;
   email?: string;
+  profileUrl?: string;
 }
 
 @Injectable()
@@ -32,6 +33,9 @@ export class AuthService {
     profile: FacebookProfile,
     rememberForThirtyDays = false,
   ) {
+    const facebookProfileUrl = this.normalizeFacebookProfileUrl(
+      profile.profileUrl,
+    );
     const identity = await this.prisma.authIdentity.findUnique({
       where: {
         provider_providerUserId: {
@@ -54,6 +58,7 @@ export class AuthService {
             displayName: profile.displayName,
             avatarUrl: profile.avatarUrl,
             email: profile.email,
+            ...(facebookProfileUrl ? { facebookProfileUrl } : {}),
             lastLoginAt: new Date(),
           },
         })
@@ -62,6 +67,7 @@ export class AuthService {
             displayName: profile.displayName,
             avatarUrl: profile.avatarUrl,
             email: profile.email,
+            facebookProfileUrl,
             lastLoginAt: new Date(),
             authIdentities: {
               create: {
@@ -91,11 +97,7 @@ export class AuthService {
     const validPassword = credential
       ? await compare(input.password, credential.passwordHash)
       : false;
-    if (
-      !credential ||
-      !validPassword ||
-      credential.user.status !== "ACTIVE"
-    )
+    if (!credential || !validPassword || credential.user.status !== "ACTIVE")
       throw new UnauthorizedException("Email hoặc mật khẩu không chính xác");
 
     const user = await this.prisma.user.update({
@@ -183,25 +185,52 @@ export class AuthService {
   }
 
   async completeProfile(userId: string, input: CompleteProfileDto) {
-    const url = new URL(input.facebookProfileUrl);
+    const existingUser = await this.prisma.user.findUniqueOrThrow({
+      where: { id: userId },
+      select: { facebookProfileUrl: true },
+    });
+    const submittedFacebookProfileUrl = input.facebookProfileUrl
+      ? this.normalizeFacebookProfileUrl(input.facebookProfileUrl)
+      : undefined;
+    const facebookProfileUrl =
+      submittedFacebookProfileUrl ?? existingUser.facebookProfileUrl;
+    if (!facebookProfileUrl) {
+      throw new BadRequestException(
+        "Vui lòng nhập đường dẫn hồ sơ Facebook hợp lệ",
+      );
+    }
+    if (input.facebookProfileUrl && !submittedFacebookProfileUrl) {
+      throw new BadRequestException(
+        "Vui lòng nhập đường dẫn hồ sơ Facebook hợp lệ",
+      );
+    }
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        phoneNumber: input.phoneNumber,
+        facebookProfileUrl,
+        profileCompletedAt: new Date(),
+      },
+    });
+  }
+
+  private normalizeFacebookProfileUrl(value?: string | null) {
+    if (!value) return undefined;
+    let url: URL;
+    try {
+      url = new URL(value);
+    } catch {
+      return undefined;
+    }
     const hostname = url.hostname.toLowerCase().replace(/^www\./, "");
     if (
       !new Set(["facebook.com", "m.facebook.com", "fb.com"]).has(hostname) ||
       url.pathname === "/"
     ) {
-      throw new BadRequestException(
-        "Vui lòng nhập đường dẫn hồ sơ Facebook hợp lệ",
-      );
+      return undefined;
     }
     url.protocol = "https:";
     url.hash = "";
-    return this.prisma.user.update({
-      where: { id: userId },
-      data: {
-        phoneNumber: input.phoneNumber,
-        facebookProfileUrl: url.toString(),
-        profileCompletedAt: new Date(),
-      },
-    });
+    return url.toString();
   }
 }
