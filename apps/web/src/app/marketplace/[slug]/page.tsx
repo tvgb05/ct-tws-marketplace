@@ -1,10 +1,9 @@
 import { notFound } from "next/navigation";
 import { ListingDetail } from "@/features/listing/listing-detail";
 import type { MarketplaceListing } from "@/lib/marketplace-types";
+import { serverApiUrl } from "@/lib/server-session";
 
 export const dynamic = "force-dynamic";
-const apiUrl =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
 
 export default async function ListingPage({
   params,
@@ -13,7 +12,7 @@ export default async function ListingPage({
 }) {
   const { slug } = await params;
   const response = await fetch(
-    `${apiUrl}/listings/${encodeURIComponent(slug)}`,
+    `${serverApiUrl()}/listings/${encodeURIComponent(slug)}`,
     { cache: "no-store" },
   );
   if (!response.ok) notFound();
