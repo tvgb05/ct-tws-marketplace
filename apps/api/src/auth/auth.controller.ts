@@ -30,10 +30,11 @@ export class AuthController {
   ) {}
 
   private cookieOptions(): CookieOptions {
+    const secure = this.config.get("COOKIE_SECURE", "false") === "true";
     return {
       httpOnly: true,
-      sameSite: "lax",
-      secure: this.config.get("COOKIE_SECURE", "false") === "true",
+      sameSite: secure ? "none" : "lax",
+      secure,
       path: "/",
     };
   }

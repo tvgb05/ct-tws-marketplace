@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { requireJwtSecret } from "../src/auth/jwt-secret";
 import { publicListingSelect } from "../src/listings/listings.service";
+import { isAllowedSessionRequestOrigin } from "../src/security/request-origin";
 
 const config = (value?: string) => ({
   get: <T>() => value as T | undefined,
@@ -31,7 +32,36 @@ assert.equal(
   false,
   "Public listing selection must not expose contactValue",
 );
+assert.equal(
+  isAllowedSessionRequestOrigin({
+    method: "POST",
+    hasSessionCookie: true,
+    origin: "https://tws-web-production.up.railway.app",
+    webUrl: "https://tws-web-production.up.railway.app",
+  }),
+  true,
+  "Authenticated mutations from the configured web origin must be accepted",
+);
+assert.equal(
+  isAllowedSessionRequestOrigin({
+    method: "POST",
+    hasSessionCookie: true,
+    origin: "https://attacker.example",
+    webUrl: "https://tws-web-production.up.railway.app",
+  }),
+  false,
+  "Authenticated cross-origin mutations must be rejected",
+);
+assert.equal(
+  isAllowedSessionRequestOrigin({
+    method: "GET",
+    hasSessionCookie: true,
+    webUrl: "https://tws-web-production.up.railway.app",
+  }),
+  true,
+  "Safe authenticated reads must remain available",
+);
 
 console.info(
-  "Security regression passed: JWT fails closed and public listings omit contact details.",
+  "Security regression passed: JWT fails closed, public listings omit contact details, and session mutations validate their origin.",
 );

@@ -4,9 +4,15 @@ import { NestFactory } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
-import { static as expressStatic } from "express";
+import {
+  static as expressStatic,
+  type NextFunction,
+  type Request,
+  type Response,
+} from "express";
 import path from "node:path";
 import { AppModule } from "./app.module";
+import { isAllowedSessionRequestOrigin } from "./security/request-origin";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,8 +22,24 @@ async function bootstrap() {
   app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
   app.use("/uploads", expressStatic(path.resolve(process.cwd(), "uploads")));
   app.use(cookieParser());
+  const webUrl = config.get("WEB_URL", "http://localhost:3000");
+  app.use((request: Request, response: Response, next: NextFunction) => {
+    if (
+      !isAllowedSessionRequestOrigin({
+        method: request.method,
+        hasSessionCookie: Boolean(request.cookies?.tws_session),
+        origin: request.get("origin"),
+        webUrl,
+      })
+    ) {
+      return response.status(403).json({
+        message: "Nguồn yêu cầu không hợp lệ",
+      });
+    }
+    return next();
+  });
   app.enableCors({
-    origin: config.get("WEB_URL", "http://localhost:3000"),
+    origin: webUrl,
     credentials: true,
   });
   app.useGlobalPipes(
