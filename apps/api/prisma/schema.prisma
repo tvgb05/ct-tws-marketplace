@@ -74,6 +74,22 @@ model AuthIdentity {
   @@index([userId])
 }
 
+model MarketplaceAd {
+  id          String                 @id @default(cuid())
+  placement   MarketplaceAdPlacement @unique
+  title       String
+  sponsorName String?
+  description String?
+  imageUrl    String?
+  targetUrl   String?
+  enabled     Boolean                @default(false)
+  updatedById String?
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+
+  @@index([enabled])
+}
+
 model Category {
   id        String    @id @default(cuid())
   name      String
@@ -308,6 +324,11 @@ enum AuthProvider {
   FACEBOOK
   GOOGLE
   EMAIL
+}
+
+enum MarketplaceAdPlacement {
+  MARKETPLACE_LEFT
+  MARKETPLACE_RIGHT
 }
 enum ListingCondition {
   NEW

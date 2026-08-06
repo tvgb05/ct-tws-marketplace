@@ -13,6 +13,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AdminAccountManager } from "@/features/admin/admin-account-manager";
 import { AdminPasswordForm } from "@/features/admin/admin-password-form";
+import { MarketplaceAdManager } from "@/features/admin/marketplace-ad-manager";
 import {
   AdminUserReportActions,
   RestorePostingPermissionButton,
@@ -159,6 +160,7 @@ export default function AdminPage() {
           </div>
           <AdminPasswordForm />
           <AdminAccountManager />
+          <MarketplaceAdManager />
           <AdminTradeConfirmations />
           <section className="admin-table admin-restricted-user-table">
             <div>

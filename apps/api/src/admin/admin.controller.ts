@@ -9,10 +9,11 @@ import {
   Param,
   Patch,
   Post,
+  ParseEnumPipe,
   UseGuards,
 } from "@nestjs/common";
 import { ApiCookieAuth, ApiTags } from "@nestjs/swagger";
-import type { User } from "@prisma/client";
+import { MarketplaceAdPlacement, type User } from "@prisma/client";
 import { CurrentUser } from "../auth/current-user.decorator";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { PrismaService } from "../prisma/prisma.service";
@@ -20,6 +21,7 @@ import { AuthService } from "../auth/auth.service";
 import { CreateAdminAccountDto } from "./dto/create-admin-account.dto";
 import { ResolveUserReportDto } from "./dto/resolve-user-report.dto";
 import { SetPostingPermissionDto } from "./dto/set-posting-permission.dto";
+import { UpdateMarketplaceAdDto } from "./dto/update-marketplace-ad.dto";
 
 @ApiTags("admin")
 @ApiCookieAuth("tws_session")
@@ -293,6 +295,68 @@ export class AdminController {
       },
       orderBy: { createdAt: "asc" },
     });
+  }
+
+  @Get("marketplace-ads")
+  marketplaceAds(@CurrentUser() user: User) {
+    if (user.role !== "ADMIN") throw new ForbiddenException();
+    return this.prisma.marketplaceAd.findMany({
+      orderBy: { placement: "asc" },
+    });
+  }
+
+  @Patch("marketplace-ads/:placement")
+  async updateMarketplaceAd(
+    @Param("placement", new ParseEnumPipe(MarketplaceAdPlacement))
+    placement: MarketplaceAdPlacement,
+    @Body() input: UpdateMarketplaceAdDto,
+    @CurrentUser() user: User,
+  ) {
+    if (user.role !== "ADMIN") throw new ForbiddenException();
+    if (input.enabled && (!input.title || !input.targetUrl))
+      throw new BadRequestException(
+        "Quảng cáo đang bật cần có tiêu đề và liên kết đích",
+      );
+    const defaults =
+      placement === MarketplaceAdPlacement.MARKETPLACE_LEFT
+        ? "Vị trí quảng cáo bên trái"
+        : "Vị trí quảng cáo bên phải";
+    const updated = await this.prisma.marketplaceAd.upsert({
+      where: { placement },
+      create: {
+        placement,
+        enabled: input.enabled,
+        title: input.title ?? defaults,
+        sponsorName: input.sponsorName,
+        description: input.description,
+        imageUrl: input.imageUrl,
+        targetUrl: input.targetUrl,
+        updatedById: user.id,
+      },
+      update: {
+        enabled: input.enabled,
+        ...(input.title !== undefined && { title: input.title }),
+        sponsorName: input.sponsorName ?? null,
+        description: input.description ?? null,
+        imageUrl: input.imageUrl ?? null,
+        targetUrl: input.targetUrl ?? null,
+        updatedById: user.id,
+      },
+    });
+    await this.prisma.auditLog.create({
+      data: {
+        actorId: user.id,
+        action: "MARKETPLACE_AD_UPDATED",
+        entityType: "MarketplaceAd",
+        entityId: updated.id,
+        newData: {
+          placement,
+          enabled: updated.enabled,
+          targetUrl: updated.targetUrl,
+        },
+      },
+    });
+    return updated;
   }
 
   @Post("accounts")

@@ -146,6 +146,21 @@ export class ListingsService {
     };
   }
 
+  marketplaceAds() {
+    return this.prisma.marketplaceAd.findMany({
+      where: { enabled: true },
+      select: {
+        placement: true,
+        title: true,
+        sponsorName: true,
+        description: true,
+        imageUrl: true,
+        targetUrl: true,
+      },
+      orderBy: { placement: "asc" },
+    });
+  }
+
   async findOne(slug: string) {
     const listing = await this.prisma.listing.findFirst({
       where: { slug, deletedAt: null, moderationStatus: "APPROVED" },

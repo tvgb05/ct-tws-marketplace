@@ -502,6 +502,30 @@ html[data-theme="dark"] .theme-toggle .theme-icon-sun {
   align-items: center;
   gap: 7px;
 }
+.market-view-toggle {
+  min-height: 40px;
+  display: inline-flex;
+  border: 1px solid #dfe0d7;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.market-view-toggle button {
+  width: 38px;
+  border: 0;
+  border-right: 1px solid #e3e4dd;
+  background: white;
+  color: #77857f;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.market-view-toggle button:last-child {
+  border-right: 0;
+}
+.market-view-toggle button.active {
+  background: var(--pine);
+  color: white;
+}
 .filter-panel {
   margin-top: 30px;
   padding: 28px;
@@ -673,6 +697,126 @@ html[data-theme="dark"] .theme-toggle .theme-icon-sun {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 25px 18px;
+}
+.listing-grid.compact {
+  grid-template-columns: repeat(5, 1fr);
+  gap: 18px 12px;
+}
+.listing-grid.compact .card-image {
+  height: 170px;
+}
+.listing-grid.compact .card-content {
+  padding: 13px;
+}
+.listing-grid.compact .card-title {
+  font-size: 13px;
+}
+.market-pagination {
+  margin-top: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.market-pagination > span {
+  display: flex;
+  gap: 6px;
+}
+.market-pagination button {
+  min-width: 38px;
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid #d9ded8;
+  background: white;
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 10px;
+  cursor: pointer;
+}
+.market-pagination button.active {
+  border-color: var(--pine);
+  background: var(--pine);
+  color: white;
+}
+.market-pagination button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.marketplace-ad-rails {
+  display: none;
+}
+@media (min-width: 1540px) {
+  .marketplace-ad-rails {
+    display: block;
+  }
+  .marketplace-ad-rail {
+    position: fixed;
+    z-index: 20;
+    top: 106px;
+    width: min(150px, calc((100vw - 1288px) / 2 - 18px));
+    min-height: 360px;
+    border: 1px solid #dfe1da;
+    background: white;
+    color: var(--ink);
+    text-decoration: none;
+    overflow: hidden;
+    box-shadow: 0 12px 28px rgba(20, 31, 27, 0.08);
+  }
+  .marketplace-ad-rail.left {
+    left: 12px;
+  }
+  .marketplace-ad-rail.right {
+    right: 12px;
+  }
+  .marketplace-ad-label {
+    position: absolute;
+    z-index: 1;
+    top: 7px;
+    right: 7px;
+    padding: 4px 6px;
+    background: rgba(13, 30, 45, 0.76);
+    color: white;
+    font-size: 7px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .marketplace-ad-rail > img {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    display: block;
+    object-fit: cover;
+    background: #edf0ea;
+  }
+  .marketplace-ad-copy {
+    padding: 13px;
+    display: grid;
+    gap: 7px;
+  }
+  .marketplace-ad-copy small {
+    color: #91713c;
+    font-size: 7px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .marketplace-ad-copy strong {
+    font-family: var(--font-serif);
+    font-size: 15px;
+    line-height: 1.25;
+  }
+  .marketplace-ad-copy em {
+    color: #74827c;
+    font-size: 8px;
+    font-style: normal;
+    line-height: 1.5;
+  }
+  .marketplace-ad-copy b {
+    color: var(--rust);
+    font-size: 8px;
+  }
 }
 .listing-card {
   border: 1px solid #e0e1d8;
@@ -2951,6 +3095,152 @@ html[data-theme="dark"] .theme-toggle .theme-icon-sun {
 .admin-account-delete:disabled {
   cursor: wait;
   opacity: 0.65;
+}
+.admin-ad-panel {
+  margin-bottom: 35px;
+  border: 1px solid #dfe0d9;
+  background: white;
+}
+.admin-ad-panel > header {
+  padding: 20px 22px;
+  border-bottom: 1px solid #e3e4dd;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+.admin-ad-panel h2 {
+  margin: 7px 0 4px;
+  font-family: var(--font-serif);
+  font-size: 21px;
+  font-weight: 500;
+}
+.admin-ad-panel header p {
+  max-width: 680px;
+  margin: 0;
+  color: #7b8984;
+  font-size: 9px;
+  line-height: 1.6;
+}
+.admin-ad-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.admin-ad-grid > article {
+  padding: 22px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 130px;
+  gap: 18px;
+  border-right: 1px solid #e3e4dd;
+}
+.admin-ad-grid > article:last-child {
+  border-right: 0;
+}
+.admin-ad-form {
+  display: grid;
+  gap: 11px;
+}
+.admin-ad-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.admin-ad-title h3 {
+  margin: 0;
+  font-size: 11px;
+}
+.admin-ad-form > label {
+  display: grid;
+  gap: 5px;
+}
+.admin-ad-form > label > span {
+  color: #45564f;
+  font-size: 8px;
+  font-weight: 700;
+}
+.admin-ad-form input:not([type="checkbox"]),
+.admin-ad-form textarea {
+  width: 100%;
+  border: 1px solid #d9ded8;
+  background: white;
+  color: var(--ink);
+  padding: 9px 10px;
+  outline: 0;
+  font: inherit;
+  font-size: 10px;
+  resize: vertical;
+}
+.admin-ad-form input:not([type="checkbox"]) {
+  height: 38px;
+}
+.admin-ad-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--pine);
+  font-size: 8px;
+  font-weight: 700;
+}
+.admin-ad-switch input {
+  accent-color: var(--pine);
+}
+.admin-ad-form .button {
+  width: fit-content;
+  min-width: 120px;
+  justify-content: center;
+}
+.admin-ad-preview {
+  align-self: start;
+  min-height: 300px;
+  border: 1px solid #e1e3dd;
+  background: #f7f8f4;
+  display: grid;
+  align-content: start;
+  gap: 9px;
+  overflow: hidden;
+}
+.admin-ad-preview > span {
+  padding: 7px 9px 0;
+  color: #8c9892;
+  font-size: 7px;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+}
+.admin-ad-preview > img,
+.admin-ad-preview > div {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  background: #e9ede7;
+}
+.admin-ad-preview > div {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 7px;
+  color: #8b9891;
+}
+.admin-ad-preview strong,
+.admin-ad-preview > a {
+  margin: 0 9px;
+}
+.admin-ad-preview strong {
+  font-family: var(--font-serif);
+  font-size: 13px;
+  line-height: 1.3;
+}
+.admin-ad-preview > a {
+  color: var(--rust);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 8px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.admin-ad-panel > .admin-form-message {
+  margin: 0 22px 18px;
 }
 .admin-table {
   border: 1px solid #dfe0d9;
@@ -5317,5 +5607,79 @@ html[data-theme="dark"] .admin-moderation-actions button.restrict {
 @media (max-width: 760px) {
   .posting-restricted-notice {
     padding: 28px 20px;
+  }
+}
+
+html[data-theme="dark"] .market-view-toggle,
+html[data-theme="dark"] .market-view-toggle button,
+html[data-theme="dark"] .market-pagination button,
+html[data-theme="dark"] .admin-ad-panel,
+html[data-theme="dark"] .admin-ad-panel > header,
+html[data-theme="dark"] .admin-ad-grid > article,
+html[data-theme="dark"] .admin-ad-preview {
+  border-color: var(--line);
+}
+html[data-theme="dark"] .market-view-toggle button,
+html[data-theme="dark"] .market-pagination button,
+html[data-theme="dark"] .admin-ad-panel,
+html[data-theme="dark"] .admin-ad-form input:not([type="checkbox"]),
+html[data-theme="dark"] .admin-ad-form textarea,
+html[data-theme="dark"] .admin-ad-preview {
+  background: #172438;
+  color: var(--ink);
+}
+html[data-theme="dark"] .market-view-toggle button.active,
+html[data-theme="dark"] .market-pagination button.active {
+  background: #294c42;
+  color: white;
+}
+html[data-theme="dark"] .admin-ad-form > label > span,
+html[data-theme="dark"] .admin-ad-title h3 {
+  color: #c9d3e0;
+}
+@media (min-width: 1540px) {
+  html[data-theme="dark"] .marketplace-ad-rail {
+    border-color: var(--line);
+    background: #172438;
+    color: var(--ink);
+  }
+  html[data-theme="dark"] .marketplace-ad-copy em {
+    color: #a7b4c4;
+  }
+}
+@media (max-width: 1100px) {
+  .listing-grid.compact {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .admin-ad-grid {
+    grid-template-columns: 1fr;
+  }
+  .admin-ad-grid > article {
+    border-right: 0;
+    border-bottom: 1px solid #e3e4dd;
+  }
+  .admin-ad-grid > article:last-child {
+    border-bottom: 0;
+  }
+}
+@media (max-width: 760px) {
+  .listing-grid.compact {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .listing-grid.compact .card-image {
+    height: 155px;
+  }
+  .market-pagination {
+    gap: 5px;
+  }
+  .market-pagination button {
+    min-width: 34px;
+    padding: 0 7px;
+  }
+  .admin-ad-grid > article {
+    grid-template-columns: 1fr;
+  }
+  .admin-ad-preview {
+    width: min(190px, 100%);
   }
 }

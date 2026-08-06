@@ -44,6 +44,11 @@ export class ListingsController {
     return this.listings.findMine(user);
   }
 
+  @Get("marketplace-ads")
+  marketplaceAds() {
+    return this.listings.marketplaceAds();
+  }
+
   @Post("images")
   @ApiCookieAuth("tws_session")
   @UseGuards(JwtAuthGuard)
