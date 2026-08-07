@@ -82,7 +82,7 @@ export function AdminAccountManager() {
       setDisplayName("");
       setEmail("");
       setPassword("");
-      setMessage("Đã cấp tài khoản admin mới.");
+      setMessage("Đã cấp tài khoản quản trị mới.");
       await loadAccounts();
     } catch {
       setError("Không thể kết nối máy chủ. Vui lòng thử lại.");
@@ -94,7 +94,7 @@ export function AdminAccountManager() {
   async function revokeAccount(account: AdminAccount) {
     if (
       !window.confirm(
-        `Thu hồi quyền admin của ${account.user.displayName} (${account.email})? Tài khoản này sẽ không thể đăng nhập lại.`,
+        `Thu hồi quyền quản trị của ${account.user.displayName} (${account.email})? Tài khoản này sẽ không thể đăng nhập lại.`,
       )
     )
       return;
@@ -114,10 +114,10 @@ export function AdminAccountManager() {
         const detail = Array.isArray(body?.message)
           ? body.message[0]
           : body?.message;
-        setError(detail ?? "Không thể thu hồi tài khoản admin.");
+        setError(detail ?? "Không thể thu hồi tài khoản quản trị.");
         return;
       }
-      setMessage(`Đã thu hồi quyền admin của ${account.user.displayName}.`);
+      setMessage(`Đã thu hồi quyền quản trị của ${account.user.displayName}.`);
       await loadAccounts();
     } catch {
       setError("Không thể kết nối máy chủ. Vui lòng thử lại.");
@@ -127,12 +127,18 @@ export function AdminAccountManager() {
   }
 
   return (
-    <section className="admin-account-panel">
+    <section
+      className="admin-account-panel admin-section-anchor"
+      id="tai-khoan-quan-tri"
+    >
       <header>
         <div>
           <span className="section-kicker">PHÂN QUYỀN</span>
           <h2>Tài khoản quản trị</h2>
-          <p>Chỉ admin đang đăng nhập mới có thể cấp thêm tài khoản admin.</p>
+          <p>
+            Chỉ quản trị viên đang đăng nhập mới có thể cấp thêm tài khoản quản
+            trị.
+          </p>
         </div>
         <span className="admin-account-count">
           <ShieldCheck size={16} /> {accounts.length} tài khoản
@@ -188,11 +194,11 @@ export function AdminAccountManager() {
             ) : (
               <KeyRound size={16} />
             )}
-            {submitting ? "Đang tạo…" : "Cấp tài khoản admin"}
+            {submitting ? "Đang tạo…" : "Cấp tài khoản quản trị"}
           </button>
         </form>
         <div className="admin-account-list">
-          <h3>Admin đã được cấp</h3>
+          <h3>Quản trị viên đã được cấp quyền</h3>
           {loading ? (
             <div className="notification-empty">
               <LoaderCircle className="spin" size={17} /> Đang tải…

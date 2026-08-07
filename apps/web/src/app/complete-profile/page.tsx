@@ -151,8 +151,8 @@ export default function CompleteProfilePage() {
               <small>
                 TWS Community Market cam kết bảo vệ số điện thoại và URL
                 Facebook, chỉ cung cấp trong luồng liên hệ giao dịch hoặc khi
-                admin hỗ trợ an toàn; không bán cho nhà quảng cáo hay chia sẻ
-                ngoài mục đích vận hành và yêu cầu pháp luật hợp lệ.
+                quản trị viên hỗ trợ an toàn; không bán cho nhà quảng cáo hay
+                chia sẻ ngoài mục đích vận hành và yêu cầu pháp luật hợp lệ.
               </small>
             </span>
           </div>

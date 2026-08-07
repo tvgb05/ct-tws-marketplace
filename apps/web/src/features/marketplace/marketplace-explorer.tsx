@@ -264,7 +264,7 @@ export function MarketplaceExplorer() {
         <div className="hero-grid">
           <div className="hero-copy">
             <span className="eyebrow">
-              <Sparkles size={15} /> Marketplace của cộng đồng
+              <Sparkles size={15} /> Chợ của cộng đồng
             </span>
             <h1>
               Món đồ phù hợp.
@@ -272,8 +272,8 @@ export function MarketplaceExplorer() {
               <em>Đúng người cần.</em>
             </h1>
             <p>
-              Mua bán tử tế, thông tin minh bạch và luôn có admin cộng đồng sẵn
-              sàng hỗ trợ khi bạn cần.
+              Mua bán tử tế, thông tin minh bạch và luôn có quản trị viên cộng
+              đồng sẵn sàng hỗ trợ khi bạn cần.
             </p>
             <div className="hero-search">
               <Search size={21} />
@@ -630,7 +630,7 @@ export function MarketplaceExplorer() {
             <div className="admin-profile-card">
               <Image
                 src="/brand/admin-profile.png"
-                alt="Admin cộng đồng Cuồng Tai Nghe TWS"
+                alt="Quản trị viên cộng đồng Cuồng Tai Nghe TWS"
                 width={58}
                 height={58}
               />
@@ -660,7 +660,7 @@ export function MarketplaceExplorer() {
               <b>02</b>
               <span>
                 <strong>An tâm</strong>
-                <small>Admin hỗ trợ miễn phí</small>
+                <small>Quản trị viên hỗ trợ miễn phí</small>
               </span>
             </div>
             <div>

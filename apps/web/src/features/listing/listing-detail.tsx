@@ -197,7 +197,7 @@ export function ListingDetail({ item }: { item: MarketplaceListing }) {
   return (
     <main className="detail-page">
       <div className="breadcrumbs">
-        <Link href="/marketplace">Marketplace</Link>
+        <Link href="/marketplace">Chợ cộng đồng</Link>
         <span>/</span>
         <Link href={`/marketplace?category=${item.category.slug}`}>
           {item.category.name}
@@ -331,7 +331,7 @@ export function ListingDetail({ item }: { item: MarketplaceListing }) {
                 </Link>
                 <AdminBadge role={item.seller.role} />
               </span>
-              <p>Tham gia marketplace từ {joined}</p>
+              <p>Tham gia chợ cộng đồng từ {joined}</p>
             </div>
             <span className="facebook-badge">f</span>
           </div>
@@ -371,7 +371,7 @@ export function ListingDetail({ item }: { item: MarketplaceListing }) {
                     setModal("mediation");
                   }}
                 >
-                  <ShieldCheck size={18} /> Nhờ admin hỗ trợ trung gian
+                  <ShieldCheck size={18} /> Nhờ quản trị viên hỗ trợ trung gian
                 </button>
               )}
           </div>
@@ -394,7 +394,7 @@ export function ListingDetail({ item }: { item: MarketplaceListing }) {
               <strong>Giao dịch an toàn</strong>
               <br />
               Kiểm tra kỹ sản phẩm và hạn chế chuyển khoản trước. Bạn có thể gửi
-              yêu cầu nhờ admin hỗ trợ.
+              yêu cầu nhờ quản trị viên hỗ trợ.
             </p>
           </div>
         </div>
@@ -487,7 +487,7 @@ export function ListingDetail({ item }: { item: MarketplaceListing }) {
                     : joiningQueue
                       ? "Tham gia hàng chờ"
                       : `Liên hệ ${item.seller.displayName}`
-                : "Nhờ admin hỗ trợ"}
+                : "Nhờ quản trị viên hỗ trợ"}
             </h2>
             <p>
               {modal === "contact"
@@ -498,7 +498,7 @@ export function ListingDetail({ item }: { item: MarketplaceListing }) {
                     : joiningQueue
                       ? `${item.seller.displayName} đang giao dịch với người mua khác. Bạn sẽ được thêm vào hàng chờ.`
                       : "Khi tiếp tục, sản phẩm sẽ chuyển sang trạng thái đang giao dịch."
-                : "Yêu cầu sẽ được gửi tới người bán và admin cộng đồng."}
+                : "Yêu cầu sẽ được gửi tới người bán và quản trị viên cộng đồng."}
             </p>
             {!interestStatus && (
               <label className="trade-quantity-picker">

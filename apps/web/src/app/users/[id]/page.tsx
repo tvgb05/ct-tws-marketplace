@@ -103,7 +103,7 @@ export default function UserProfilePage() {
         setFeedback(message ?? "Không thể gửi tố cáo.");
         return;
       }
-      setFeedback("Phiếu tố cáo đã được gửi tới admin.");
+      setFeedback("Phiếu tố cáo đã được gửi tới quản trị viên.");
       setDescription("");
     } catch {
       setFeedback("Không thể kết nối máy chủ. Vui lòng thử lại.");
@@ -153,7 +153,7 @@ export default function UserProfilePage() {
             <h1>{profile.user.displayName}</h1>
             <AdminBadge role={profile.user.role} />
           </span>
-          <p>Tham gia marketplace từ {joined}</p>
+          <p>Tham gia chợ cộng đồng từ {joined}</p>
         </div>
         {!isOwnProfile && (
           <button
@@ -260,7 +260,7 @@ export default function UserProfilePage() {
               <AlertTriangle />
             </span>
             <h2>Tố cáo {profile.user.displayName}</h2>
-            <p>Phiếu sẽ được chuyển tới admin để xem xét.</p>
+            <p>Phiếu sẽ được chuyển tới quản trị viên để xem xét.</p>
             <label>
               <span>Lý do</span>
               <select
@@ -284,7 +284,7 @@ export default function UserProfilePage() {
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
                 maxLength={1000}
-                placeholder="Cung cấp thông tin giúp admin xác minh"
+                placeholder="Cung cấp thông tin giúp quản trị viên xác minh"
               />
             </label>
             {feedback && <p className="user-report-feedback">{feedback}</p>}

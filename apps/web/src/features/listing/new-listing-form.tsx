@@ -108,14 +108,14 @@ export function NewListingForm() {
           <h1>Bạn chưa thể đăng sản phẩm mới.</h1>
           <p>
             {user.postingRestrictionReason ||
-              "Admin đã tạm khóa quyền đăng bài do vi phạm quy tắc cộng đồng."}
+              "Quản trị viên đã tạm khóa quyền đăng bài do vi phạm quy tắc cộng đồng."}
           </p>
           <p>
             Bạn vẫn có thể đăng nhập, theo dõi giao dịch hiện tại và liên hệ
-            admin nếu cho rằng quyết định này cần được xem xét lại.
+            quản trị viên nếu cho rằng quyết định này cần được xem xét lại.
           </p>
           <Link className="button button-primary" href="/community-guidelines">
-            Xem quy tắc và liên hệ admin
+            Xem quy tắc và liên hệ quản trị viên
           </Link>
         </section>
       </main>
@@ -670,10 +670,10 @@ export function NewListingForm() {
                   }
                 />
                 <span>
-                  <strong>Cho phép admin hỗ trợ trung gian</strong>
+                  <strong>Cho phép quản trị viên hỗ trợ trung gian</strong>
                   <small>
-                    Người mua có thể gửi yêu cầu nhờ admin cộng đồng hỗ trợ giao
-                    dịch miễn phí.
+                    Người mua có thể gửi yêu cầu nhờ quản trị viên cộng đồng hỗ
+                    trợ giao dịch miễn phí.
                   </small>
                 </span>
                 <ShieldCheck />

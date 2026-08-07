@@ -2579,6 +2579,74 @@ html[data-theme="dark"] .theme-toggle .theme-icon-sun {
   margin: auto;
   padding: 55px 0 80px;
 }
+.admin-dashboard-page {
+  width: min(1380px, calc(100% - 40px));
+}
+.admin-dashboard-layout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+.admin-dashboard-content {
+  min-width: 0;
+}
+.admin-side-navigation {
+  position: sticky;
+  top: 88px;
+  max-height: calc(100vh - 110px);
+  padding: 20px 14px 14px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  box-shadow: 0 12px 32px rgba(25, 54, 80, 0.08);
+  overflow-y: auto;
+}
+.admin-side-navigation > div {
+  display: grid;
+  gap: 6px;
+  padding: 0 7px 15px;
+  border-bottom: 1px solid var(--line);
+}
+.admin-side-navigation > div > strong {
+  color: var(--ink);
+  font-size: 14px;
+}
+.admin-side-navigation nav {
+  display: grid;
+  gap: 3px;
+  padding: 10px 0;
+}
+.admin-side-navigation nav a {
+  min-height: 42px;
+  padding: 0 10px;
+  border-left: 3px solid transparent;
+  color: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  font-weight: 700;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease;
+}
+.admin-side-navigation nav a:hover,
+.admin-side-navigation nav a.active {
+  border-left-color: var(--rust);
+  background: var(--cream);
+  color: var(--ink);
+}
+.admin-side-navigation > small {
+  display: block;
+  padding: 10px 7px 2px;
+  color: var(--ink-soft);
+  font-size: 11px;
+  line-height: 1.45;
+}
+.admin-section-anchor {
+  scroll-margin-top: 92px;
+}
 .dashboard-heading {
   display: flex;
   align-items: end;
@@ -3590,7 +3658,12 @@ html[data-theme="dark"] .theme-toggle .theme-icon-sun {
   padding: 0 16px;
   background: var(--pine);
   color: white;
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
+  gap: 6px;
+  text-align: center;
+  line-height: 1;
   font-weight: 700;
 }
 .admin-pagination {
@@ -6350,5 +6423,104 @@ html[data-theme="dark"] .admin-ad-title h3 {
   }
   .admin-ad-preview {
     width: min(190px, 100%);
+  }
+}
+
+/* Admin-only navigation and final dark-theme readability pass */
+html[data-theme="dark"] {
+  --ink: #f8fafc;
+  --ink-soft: #e1e7ef;
+  --text-on-dark: #fbfcfe;
+  --text-on-dark-soft: #e4eaf2;
+}
+
+html[data-theme="dark"] .admin-side-navigation {
+  border-color: #405067;
+  background: #162337;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.24);
+}
+
+html[data-theme="dark"] .admin-side-navigation nav a:hover,
+html[data-theme="dark"] .admin-side-navigation nav a.active {
+  background: #22334a;
+  color: var(--ink);
+}
+
+html[data-theme="dark"] main :where(p, small, em, time, td, figcaption) {
+  color: var(--ink-soft) !important;
+}
+
+html[data-theme="dark"]
+  :where(
+    .logo small,
+    .nav a,
+    .profile-dropdown small,
+    .site-footer p,
+    .site-footer small
+  ),
+html[data-theme="dark"]
+  main
+  :where(
+    .card-location,
+    .card-seller,
+    .detail-meta,
+    .listing-actions label,
+    .admin-table-controls label,
+    .forum-controls label
+  ) {
+  color: var(--ink-soft) !important;
+}
+
+html[data-theme="dark"]
+  main
+  :where(
+    .admin-form-message.error,
+    .profile-setup-error,
+    .email-otp-message.error,
+    .admin-mediation-error,
+    .user-report-feedback
+  ) {
+  color: #ffc1b3 !important;
+}
+
+html[data-theme="dark"]
+  main
+  :where(.admin-form-message.success, .email-otp-message.success) {
+  color: #bce8cb !important;
+}
+
+@media (max-width: 920px) {
+  .admin-dashboard-page {
+    width: min(100% - 28px, 760px);
+  }
+  .admin-dashboard-layout {
+    grid-template-columns: 1fr;
+  }
+  .admin-side-navigation {
+    z-index: 8;
+    top: 72px;
+    max-height: none;
+    padding: 10px;
+    overflow: hidden;
+  }
+  .admin-side-navigation > div,
+  .admin-side-navigation > small {
+    display: none;
+  }
+  .admin-side-navigation nav {
+    display: flex;
+    padding: 0;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+  .admin-side-navigation nav a {
+    min-width: max-content;
+    border-left: 0;
+    border-bottom: 3px solid transparent;
+  }
+  .admin-side-navigation nav a:hover,
+  .admin-side-navigation nav a.active {
+    border-left-color: transparent;
+    border-bottom-color: var(--rust);
   }
 }

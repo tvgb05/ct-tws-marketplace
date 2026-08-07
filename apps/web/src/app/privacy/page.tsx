@@ -16,16 +16,16 @@ export default function PrivacyPage() {
       <p>
         Dữ liệu giúp duy trì tài khoản, hiển thị người bán, xử lý báo cáo và hỗ
         trợ giao dịch. Số điện thoại và URL Facebook chỉ được hiển thị cho thành
-        viên đã đăng nhập khi họ chủ động bắt đầu liên hệ mua bán, và cho admin
-        khi cần xử lý an toàn, báo cáo hoặc trung gian.
+        viên đã đăng nhập khi họ chủ động bắt đầu liên hệ mua bán, và cho quản
+        trị viên khi cần xử lý an toàn, báo cáo hoặc trung gian.
       </p>
       <h2>Cam kết về thông tin liên hệ</h2>
       <p>
         TWS Community Market cam kết áp dụng biện pháp hợp lý để bảo vệ số điện
         thoại và URL Facebook, không bán cho nhà quảng cáo và không chia sẻ
-        ngoài phạm vi cần thiết để vận hành marketplace, hỗ trợ an toàn hoặc đáp
-        ứng yêu cầu pháp luật hợp lệ. Quyền truy cập được giới hạn theo luồng
-        liên hệ giao dịch và vai trò quản trị.
+        ngoài phạm vi cần thiết để vận hành chợ cộng đồng, hỗ trợ an toàn hoặc
+        đáp ứng yêu cầu pháp luật hợp lệ. Quyền truy cập được giới hạn theo
+        luồng liên hệ giao dịch và vai trò quản trị.
       </p>
       <p>
         Email OTP được gửi qua Resend với tên người gửi taskflow-planner. Nền

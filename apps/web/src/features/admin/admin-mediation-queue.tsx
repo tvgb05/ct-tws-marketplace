@@ -125,8 +125,8 @@ export function AdminMediationQueue() {
         <div>
           <h2>Phân công giao dịch trung gian</h2>
           <p>
-            Tất cả admin thấy hàng chờ. Admin bấm nhận sẽ chịu trách nhiệm độc
-            quyền cho giao dịch đó.
+            Tất cả quản trị viên đều thấy hàng chờ. Người bấm nhận sẽ chịu trách
+            nhiệm riêng cho giao dịch đó.
           </p>
         </div>
         <ShieldCheck size={20} />
@@ -150,10 +150,12 @@ export function AdminMediationQueue() {
           }}
           aria-label="Lọc yêu cầu trung gian"
         >
-          <option value="PENDING">Chưa có admin nhận</option>
+          <option value="PENDING">Chưa có người phụ trách</option>
           <option value="MINE">Tôi đang phụ trách</option>
         </select>
-        <button type="submit">Tìm kiếm</button>
+        <button type="submit">
+          <Search size={15} /> Tìm kiếm
+        </button>
       </form>
       {error && <p className="admin-mediation-error">{error}</p>}
       {loading ? (
@@ -202,7 +204,13 @@ export function AdminMediationQueue() {
                     <td>
                       {request.trade?.allocatedQuantity ?? 0} /{" "}
                       {request.trade?.requestedQuantity ?? 0}
-                      <small>{request.trade?.status ?? "Chưa tạo đơn"}</small>
+                      <small>
+                        {request.trade?.status === "ACTIVE"
+                          ? "Đang giao dịch"
+                          : request.trade?.status === "QUEUED"
+                            ? "Đang chờ"
+                            : (request.trade?.status ?? "Chưa tạo giao dịch")}
+                      </small>
                     </td>
                     <td>{relativeListingTime(request.createdAt)}</td>
                     <td>
@@ -266,7 +274,7 @@ export function AdminMediationQueue() {
       ) : (
         <div className="notification-empty">
           {scope === "PENDING"
-            ? "Không có yêu cầu nào đang chờ admin nhận."
+            ? "Không có yêu cầu nào đang chờ người phụ trách."
             : "Bạn chưa nhận phụ trách giao dịch nào."}
         </div>
       )}

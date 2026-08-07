@@ -17,7 +17,7 @@ export default function TermsPage() {
       <p>
         Khi nhận được số điện thoại hoặc URL Facebook của thành viên khác, bạn
         chỉ được dùng thông tin đó để trao đổi về giao dịch đã chủ động bắt đầu
-        trên marketplace. Bạn không được công khai, bán, chuyển tiếp cho người
+        trên chợ cộng đồng. Bạn không được công khai, bán, chuyển tiếp cho người
         khác, dùng cho quảng cáo, gửi tin không mong muốn, quấy rối, giả mạo
         hoặc bất kỳ mục đích nào không liên quan đến giao dịch đó.
       </p>
@@ -25,7 +25,7 @@ export default function TermsPage() {
         Bạn phải áp dụng biện pháp hợp lý để bảo vệ thông tin đã nhận, không lưu
         giữ lâu hơn mức cần thiết và xóa thông tin khi không còn phục vụ giao
         dịch hoặc giải quyết tranh chấp. Nếu phát hiện lộ lọt hoặc sử dụng sai
-        mục đích, hãy dừng liên hệ và báo ngay cho admin.
+        mục đích, hãy dừng liên hệ và báo ngay cho quản trị viên.
       </p>
 
       <h2>Vi phạm và xử lý</h2>
@@ -36,11 +36,11 @@ export default function TermsPage() {
         luật hợp lệ.
       </p>
 
-      <h2>Hỗ trợ của Admin</h2>
+      <h2>Hỗ trợ của quản trị viên</h2>
       <p>
-        Admin hỗ trợ kết nối hai bên miễn phí theo khả năng của cộng đồng. Thành
-        viên vẫn chịu trách nhiệm kiểm tra sản phẩm, thống nhất giao dịch và bảo
-        vệ thông tin cá nhân.
+        Quản trị viên hỗ trợ kết nối hai bên miễn phí theo khả năng của cộng
+        đồng. Thành viên vẫn chịu trách nhiệm kiểm tra sản phẩm, thống nhất giao
+        dịch và bảo vệ thông tin cá nhân.
       </p>
     </main>
   );

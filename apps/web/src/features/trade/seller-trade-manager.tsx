@@ -225,7 +225,9 @@ export function SellerTradeManager({
                       {trade.allocatedQuantity < trade.requestedQuantity
                         ? ` · yêu cầu ban đầu ${trade.requestedQuantity}`
                         : ""}
-                      {trade.mediationRequest ? " · Trung gian qua admin" : ""}
+                      {trade.mediationRequest
+                        ? " · Trung gian qua quản trị viên"
+                        : ""}
                     </em>
                     {trade.mediationRequest?.admin && (
                       <span className="trade-assigned-admin">

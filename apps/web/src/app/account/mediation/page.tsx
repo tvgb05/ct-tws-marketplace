@@ -19,10 +19,10 @@ type MediationRequest = {
   admin: { id: string; displayName: string; role: "USER" | "ADMIN" } | null;
 };
 const statusLabel: Record<string, string> = {
-  REQUESTED: "Chờ admin duyệt",
-  SELLER_ACCEPTED: "Chờ admin",
+  REQUESTED: "Chờ quản trị viên duyệt",
+  SELLER_ACCEPTED: "Chờ quản trị viên",
   SELLER_REJECTED: "Người bán từ chối",
-  ADMIN_ASSIGNED: "Đã có admin",
+  ADMIN_ASSIGNED: "Đã có người phụ trách",
   IN_PROGRESS: "Đang xử lý",
   COMPLETED: "Đã hoàn tất",
   CANCELLED: "Đã hủy",
@@ -61,7 +61,7 @@ export default function MediationPage() {
         >
           <Image
             src="/brand/admin-profile.png"
-            alt="Admin phụ trách hỗ trợ"
+            alt="Quản trị viên phụ trách hỗ trợ"
             width={54}
             height={54}
           />

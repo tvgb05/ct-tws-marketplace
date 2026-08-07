@@ -4,7 +4,7 @@ export function AdminBadge({ role }: { role?: string | null }) {
   if (role !== "ADMIN") return null;
   return (
     <span className="user-admin-badge" title="Tài khoản quản trị cộng đồng">
-      <ShieldCheck size={11} /> Admin
+      <ShieldCheck size={11} /> Quản trị
     </span>
   );
 }

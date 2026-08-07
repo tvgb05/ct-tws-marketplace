@@ -36,7 +36,7 @@ const rules = [
     n: "04",
     icon: ShieldCheck,
     title: "Cùng nhau giữ an toàn",
-    text: "Báo cáo nội dung đáng ngờ và nhờ admin hỗ trợ khi bạn cảm thấy chưa an tâm.",
+    text: "Báo cáo nội dung đáng ngờ và nhờ quản trị viên hỗ trợ khi bạn cảm thấy chưa an tâm.",
   },
 ];
 
@@ -48,17 +48,17 @@ const faqGroups = [
       {
         question: "Website nhận được thông tin gì khi tôi đăng nhập?",
         answer:
-          "Google cung cấp mã tài khoản theo ứng dụng, tên hiển thị, email và ảnh đại diện. Với đăng nhập email, website chỉ xác nhận quyền sở hữu email bằng mã OTP dùng một lần; website không nhận mật khẩu Google hoặc mật khẩu email của bạn.",
+          "Google cung cấp mã tài khoản theo ứng dụng, tên hiển thị, email và ảnh đại diện. Với đăng nhập email, trang web chỉ xác nhận quyền sở hữu email bằng mã OTP dùng một lần; trang web không nhận mật khẩu Google hoặc mật khẩu email của bạn.",
       },
       {
         question: "Số điện thoại và đường dẫn Facebook có được xác minh không?",
         answer:
-          "URL Facebook và số điện thoại do người dùng nhập tay chỉ được kiểm tra định dạng, không được Google, Meta hoặc website tự động xác minh. Hãy đối chiếu thông tin và nhờ admin hỗ trợ nếu có dấu hiệu giả mạo.",
+          "URL Facebook và số điện thoại do người dùng nhập tay chỉ được kiểm tra định dạng, không được Google, Meta hoặc trang web tự động xác minh. Hãy đối chiếu thông tin và nhờ quản trị viên hỗ trợ nếu có dấu hiệu giả mạo.",
       },
       {
         question: "Khi nào thông tin liên hệ của tôi được hiển thị?",
         answer:
-          "Số điện thoại và URL Facebook chỉ được trả về cho thành viên đã đăng nhập khi họ chủ động bắt đầu liên hệ mua bán, và cho admin khi cần hỗ trợ an toàn. TWS Community Market cam kết bảo vệ, không bán cho nhà quảng cáo và không đưa các thông tin này vào email OTP. Thành viên nhận được thông tin phải tuân thủ Điều khoản sử dụng.",
+          "Số điện thoại và URL Facebook chỉ được trả về cho thành viên đã đăng nhập khi họ chủ động bắt đầu liên hệ mua bán, và cho quản trị viên khi cần hỗ trợ an toàn. TWS Community Market cam kết bảo vệ, không bán cho nhà quảng cáo và không đưa các thông tin này vào email OTP. Thành viên nhận được thông tin phải tuân thủ Điều khoản sử dụng.",
       },
       {
         question: "Vì sao email OTP mang tên taskflow-planner?",
@@ -72,19 +72,19 @@ const faqGroups = [
     title: "Trách nhiệm & an toàn",
     items: [
       {
-        question: "Marketplace có giữ tiền hoặc bảo đảm giao dịch không?",
+        question: "Chợ cộng đồng có giữ tiền hoặc bảo đảm giao dịch không?",
         answer:
           "Không. Nền tảng không xử lý thanh toán, không giữ tiền và không cung cấp dịch vụ ký quỹ. Hai bên chịu trách nhiệm kiểm tra sản phẩm, thống nhất phương thức giao nhận và bảo vệ thông tin cá nhân.",
       },
       {
-        question: "Admin hỗ trợ trung gian đến mức nào?",
+        question: "Quản trị viên hỗ trợ trung gian đến mức nào?",
         answer:
-          "Admin hỗ trợ kết nối, theo dõi yêu cầu và có thể xác nhận hoàn tất giao dịch trung gian. Việc hỗ trợ không thay thế trách nhiệm kiểm tra sản phẩm và thanh toán của người mua, người bán.",
+          "Quản trị viên hỗ trợ kết nối, theo dõi yêu cầu và có thể xác nhận hoàn tất giao dịch trung gian. Việc hỗ trợ không thay thế trách nhiệm kiểm tra sản phẩm và thanh toán của người mua, người bán.",
       },
       {
         question: "Tôi nên làm gì khi thấy bài đăng đáng ngờ?",
         answer:
-          "Không chuyển tiền trước khi kiểm tra đầy đủ. Hãy dừng trao đổi, lưu lại thông tin cần thiết và liên hệ admin cộng đồng để được hướng dẫn.",
+          "Không chuyển tiền trước khi kiểm tra đầy đủ. Hãy dừng trao đổi, lưu lại thông tin cần thiết và liên hệ quản trị viên cộng đồng để được hướng dẫn.",
       },
     ],
   },
@@ -105,7 +105,7 @@ const faqGroups = [
       {
         question: "Khi nào sản phẩm được đánh dấu Đã bán?",
         answer:
-          "Với giao dịch trực tiếp, người bán chọn Đã bán. Với giao dịch trung gian, sản phẩm chuyển sang Đã bán sau khi admin xác nhận hoàn tất.",
+          "Với giao dịch trực tiếp, người bán chọn Đã bán. Với giao dịch trung gian, sản phẩm chuyển sang Đã bán sau khi quản trị viên xác nhận hoàn tất.",
       },
     ],
   },
@@ -117,7 +117,7 @@ export default function GuidelinesPage() {
       <header>
         <span className="section-kicker">QUY TẮC CỘNG ĐỒNG</span>
         <h1>
-          Một marketplace tốt
+          Một chợ cộng đồng tốt
           <br />
           được xây bằng <em>sự tử tế.</em>
         </h1>
@@ -146,7 +146,7 @@ export default function GuidelinesPage() {
           <h2 id="faq-title">Thông tin cần biết trước khi giao dịch</h2>
           <p>
             Các câu trả lời dưới đây mô tả đúng phạm vi dữ liệu và cách hoạt
-            động hiện tại của marketplace.
+            động hiện tại của chợ cộng đồng.
           </p>
         </div>
         <div className="faq-groups">
@@ -180,17 +180,17 @@ export default function GuidelinesPage() {
       >
         <Image
           src="/brand/admin-profile.png"
-          alt="Admin cộng đồng Cuồng Tai Nghe TWS"
+          alt="Quản trị viên cộng đồng Cuồng Tai Nghe TWS"
           width={84}
           height={84}
         />
         <div>
           <span className="section-kicker light">HỖ TRỢ CỘNG ĐỒNG</span>
-          <h2 id="admin-contact-title">Bạn vẫn cần admin hỗ trợ?</h2>
+          <h2 id="admin-contact-title">Bạn vẫn cần quản trị viên hỗ trợ?</h2>
           <p>
-            Liên hệ admin khi cần hỗ trợ giao dịch hoặc gặp nội dung đáng ngờ.
-            Với lỗi kỹ thuật và đề xuất cải thiện website, hãy gửi qua biểu mẫu
-            góp ý để thông tin được ghi nhận đầy đủ.
+            Liên hệ quản trị viên khi cần hỗ trợ giao dịch hoặc gặp nội dung
+            đáng ngờ. Với lỗi kỹ thuật và đề xuất cải thiện trang web, hãy gửi
+            qua biểu mẫu góp ý để thông tin được ghi nhận đầy đủ.
           </p>
         </div>
         <div className="admin-contact-actions">

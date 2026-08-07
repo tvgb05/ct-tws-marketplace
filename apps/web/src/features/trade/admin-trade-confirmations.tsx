@@ -76,7 +76,7 @@ export function AdminTradeConfirmations() {
       <div className="trade-manager-heading">
         <div>
           <span className="section-kicker">GIAO DỊCH TRUNG GIAN</span>
-          <h2>Chờ admin xác nhận</h2>
+          <h2>Chờ quản trị viên xác nhận</h2>
         </div>
         <span>
           <ShieldCheck size={16} /> {pending.length} giao dịch

@@ -52,16 +52,19 @@ export function AdminForumManager() {
   }
 
   return (
-    <section className="admin-forum-panel">
+    <section
+      className="admin-forum-panel admin-section-anchor"
+      id="dien-dan-quan-tri"
+    >
       <header>
         <span className="admin-forum-icon">
           <Megaphone size={20} />
         </span>
         <div>
-          <h2>Đăng thông tin lên Forum</h2>
+          <h2>Đăng thông tin lên Diễn đàn</h2>
           <p>
-            Bài đăng xuất hiện trong FAQ và tạo một thông báo chưa đọc cho mọi
-            tài khoản thành viên đang hoạt động.
+            Bài đăng xuất hiện trong mục Hỏi đáp và tạo một thông báo chưa đọc
+            cho mọi tài khoản thành viên đang hoạt động.
           </p>
         </div>
       </header>

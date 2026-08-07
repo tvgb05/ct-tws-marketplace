@@ -103,7 +103,7 @@ export function ForumBoard() {
         <span className="section-kicker">
           <MessagesSquare size={15} /> FORUM THÔNG TIN
         </span>
-        <h2 id="forum-title">Cập nhật từ admin cộng đồng</h2>
+        <h2 id="forum-title">Cập nhật từ quản trị viên cộng đồng</h2>
         <p>
           Quy định mới, cảnh báo an toàn và hướng dẫn bổ sung sẽ được lưu tại
           đây. Mỗi bài mới đồng thời tạo thông báo cho mọi thành viên đang hoạt
@@ -117,8 +117,8 @@ export function ForumBoard() {
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
             maxLength={100}
-            placeholder="Tìm theo tiêu đề, nội dung hoặc admin…"
-            aria-label="Tìm trong Forum"
+            placeholder="Tìm theo tiêu đề, nội dung hoặc quản trị viên…"
+            aria-label="Tìm trong Diễn đàn"
           />
         </label>
         <select
@@ -127,7 +127,7 @@ export function ForumBoard() {
             setSort(event.target.value as "NEWEST" | "OLDEST");
             setPage(1);
           }}
-          aria-label="Sắp xếp bài Forum"
+          aria-label="Sắp xếp bài Diễn đàn"
         >
           <option value="NEWEST">Mới nhất</option>
           <option value="OLDEST">Cũ nhất</option>
@@ -182,7 +182,7 @@ export function ForumBoard() {
             ))}
           </div>
           {result && (
-            <nav className="forum-pagination" aria-label="Phân trang Forum">
+            <nav className="forum-pagination" aria-label="Phân trang Diễn đàn">
               <span>
                 Trang {result.page}/{result.totalPages}
               </span>
@@ -191,7 +191,7 @@ export function ForumBoard() {
                   type="button"
                   disabled={loading || result.page <= 1}
                   onClick={() => setPage((current) => current - 1)}
-                  aria-label="Trang Forum trước"
+                  aria-label="Trang Diễn đàn trước"
                 >
                   <ChevronLeft size={17} /> Trước
                 </button>
@@ -199,7 +199,7 @@ export function ForumBoard() {
                   type="button"
                   disabled={loading || result.page >= result.totalPages}
                   onClick={() => setPage((current) => current + 1)}
-                  aria-label="Trang Forum sau"
+                  aria-label="Trang Diễn đàn sau"
                 >
                   Sau <ChevronRight size={17} />
                 </button>
@@ -210,8 +210,8 @@ export function ForumBoard() {
       ) : (
         <div className="forum-empty">
           {query
-            ? `Không tìm thấy bài Forum phù hợp với “${query}”.`
-            : "Chưa có bài forum nào. Thông tin mới từ admin sẽ xuất hiện tại đây."}
+            ? `Không tìm thấy bài Diễn đàn phù hợp với “${query}”.`
+            : "Chưa có bài Diễn đàn nào. Thông tin mới từ quản trị viên sẽ xuất hiện tại đây."}
         </div>
       )}
     </section>

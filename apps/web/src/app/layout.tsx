@@ -30,7 +30,7 @@ const themeScript = `
 
 export const metadata: Metadata = {
   title: "TWS Community Market",
-  description: "Marketplace mua bán tử tế dành cho cộng đồng TWS",
+  description: "Chợ mua bán tử tế dành cho cộng đồng TWS",
 };
 
 export default function RootLayout({

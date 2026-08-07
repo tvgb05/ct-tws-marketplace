@@ -156,7 +156,10 @@ export function AdminUserDirectory() {
   }
 
   return (
-    <section className="admin-table admin-user-directory">
+    <section
+      className="admin-table admin-user-directory admin-section-anchor"
+      id="quan-ly-thanh-vien"
+    >
       <div>
         <h2>Quản lý tài khoản thành viên</h2>
         <p>
@@ -187,7 +190,9 @@ export function AdminUserDirectory() {
           <option value="RECENT">Hoạt động trong 30 ngày</option>
           <option value="RESTRICTED">Đang bị khóa quyền đăng</option>
         </select>
-        <button type="submit">Tìm kiếm</button>
+        <button type="submit">
+          <Search size={15} /> Tìm kiếm
+        </button>
       </form>
       {loading ? (
         <div className="notification-empty">
@@ -353,7 +358,9 @@ function AdminReportQueue({ kind }: { kind: "user" | "listing" }) {
           <option value="OPEN">Chưa xem</option>
           <option value="REVIEWING">Đang xem</option>
         </select>
-        <button type="submit">Tìm kiếm</button>
+        <button type="submit">
+          <Search size={15} /> Tìm kiếm
+        </button>
       </form>
       {loading ? (
         <div className="notification-empty">

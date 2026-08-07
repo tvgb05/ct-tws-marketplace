@@ -27,8 +27,8 @@ const sellerSteps = [
   },
   {
     icon: Handshake,
-    title: "Trao đổi trực tiếp hoặc qua admin",
-    text: "Hai bên có thể tự thống nhất giá, giao nhận và thanh toán; hoặc chọn hỗ trợ trung gian để admin theo dõi giao dịch.",
+    title: "Trao đổi trực tiếp hoặc qua quản trị viên",
+    text: "Hai bên có thể tự thống nhất giá, giao nhận và thanh toán; hoặc chọn hỗ trợ trung gian để quản trị viên theo dõi giao dịch.",
   },
   {
     icon: ThumbsDown,
@@ -37,8 +37,8 @@ const sellerSteps = [
   },
   {
     icon: PackageCheck,
-    title: "Xác nhận lại trên website",
-    text: "Sau khi giao hàng thành công, người bán chọn Đã bán. Với giao dịch trung gian, admin là người xác nhận hoàn tất.",
+    title: "Xác nhận lại trên trang web",
+    text: "Sau khi giao hàng thành công, người bán chọn Đã bán. Với giao dịch trung gian, quản trị viên là người xác nhận hoàn tất.",
   },
 ];
 
@@ -60,8 +60,8 @@ const buyerSteps = [
   },
   {
     icon: ShieldCheck,
-    title: "Tự thỏa thuận hoặc nhờ admin",
-    text: "Người mua có thể trao đổi trực tiếp với người bán hoặc gửi yêu cầu hỗ trợ trung gian qua admin cộng đồng.",
+    title: "Tự thỏa thuận hoặc nhờ quản trị viên",
+    text: "Người mua có thể trao đổi trực tiếp với người bán hoặc gửi yêu cầu hỗ trợ trung gian qua quản trị viên cộng đồng.",
   },
   {
     icon: Hourglass,
@@ -166,7 +166,9 @@ export default function HowItWorksPage() {
 
       <p className="guide-more-links">
         Cần biết thêm?{" "}
-        <Link href="/community-guidelines">Xem quy tắc cộng đồng và FAQ</Link>
+        <Link href="/community-guidelines">
+          Xem quy tắc cộng đồng và Hỏi đáp
+        </Link>
       </p>
     </main>
   );

@@ -36,7 +36,7 @@ const links = [
     href: "/account/mediation",
     icon: ShieldCheck,
     title: "Yêu cầu trung gian",
-    text: "Theo dõi hỗ trợ từ admin",
+    text: "Theo dõi hỗ trợ từ quản trị viên",
   },
   {
     href: "/account/notifications",
@@ -111,7 +111,7 @@ export default function AccountPage() {
             {user.role === "ADMIN"
               ? "Tài khoản quản trị"
               : "Tài khoản thành viên"}{" "}
-            · Tham gia marketplace từ {joined}
+            · Tham gia chợ cộng đồng từ {joined}
           </p>
         </div>
         <div className="account-hero-actions">

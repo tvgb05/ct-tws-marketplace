@@ -53,14 +53,14 @@ export function AdminPasswordForm() {
   }
 
   return (
-    <section className="admin-password-panel">
+    <section className="admin-password-panel admin-section-anchor" id="bao-mat">
       <div className="admin-password-heading">
         <span className="admin-password-icon">
           <KeyRound size={20} />
         </span>
         <div>
           <span className="section-kicker">BẢO MẬT TÀI KHOẢN</span>
-          <h2>Đổi mật khẩu admin</h2>
+          <h2>Đổi mật khẩu quản trị viên</h2>
           <p>Cần nhập đúng mật khẩu hiện tại trước khi đặt mật khẩu mới.</p>
         </div>
       </div>
