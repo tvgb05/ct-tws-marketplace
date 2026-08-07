@@ -114,15 +114,19 @@ export default function AccountPage() {
             · Tham gia marketplace từ {joined}
           </p>
         </div>
-        <Link
-          href={
-            user.role === "ADMIN" ? "/admin" : "/complete-profile?next=/account"
-          }
-          className="button button-outline"
-        >
-          <UserRound size={16} />
-          {user.role === "ADMIN" ? "Mở trang quản trị" : "Cập nhật hồ sơ"}
-        </Link>
+        <div className="account-hero-actions">
+          <Link
+            href="/complete-profile?next=/account"
+            className="button button-outline"
+          >
+            <UserRound size={16} /> Cập nhật hồ sơ
+          </Link>
+          {user.role === "ADMIN" && (
+            <Link href="/admin" className="button button-primary">
+              <ShieldCheck size={16} /> Mở trang quản trị
+            </Link>
+          )}
+        </div>
       </section>
       <div className="account-layout">
         <section>

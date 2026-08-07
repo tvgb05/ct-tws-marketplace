@@ -81,13 +81,24 @@ async function main() {
       "Forum post should notify every active member",
     );
 
-    const posts = await json<Array<{ id: string }>>(
-      await api("/forum/posts", memberCookie),
+    const posts = await json<{
+      items: Array<{ id: string }>;
+      page: number;
+      pageSize: number;
+      totalPages: number;
+    }>(
+      await api(
+        `/forum/posts?q=${encodeURIComponent(testTitle)}&sort=NEWEST&page=1&pageSize=5`,
+        memberCookie,
+      ),
     );
     assert(
-      posts.some(({ id }) => id === postId),
-      "Member should see forum post",
+      posts.items.some(({ id }) => id === postId),
+      "Member should find the forum post through paginated search",
     );
+    assert(posts.page === 1, "Forum should return the requested page");
+    assert(posts.pageSize === 5, "Forum should return the requested page size");
+    assert(posts.totalPages >= 1, "Forum should return pagination metadata");
 
     const notifications = await json<
       Array<{ type: string; targetUrl: string | null; readAt: string | null }>

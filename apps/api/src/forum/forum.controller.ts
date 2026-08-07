@@ -4,14 +4,16 @@ import {
   ForbiddenException,
   Get,
   Post,
+  Query,
   UseGuards,
 } from "@nestjs/common";
 import { ApiCookieAuth, ApiTags } from "@nestjs/swagger";
-import type { User } from "@prisma/client";
+import type { Prisma, User } from "@prisma/client";
 import { CurrentUser } from "../auth/current-user.decorator";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateForumPostDto } from "./dto/create-forum-post.dto";
+import { ForumPostsQueryDto } from "./dto/forum-posts-query.dto";
 
 @ApiTags("forum")
 @ApiCookieAuth("tws_session")
@@ -21,19 +23,47 @@ export class ForumController {
   constructor(private readonly prisma: PrismaService) {}
 
   @Get("posts")
-  posts() {
-    return this.prisma.forumPost.findMany({
-      select: {
-        id: true,
-        title: true,
-        content: true,
-        publishedAt: true,
-        updatedAt: true,
-        author: { select: { id: true, displayName: true, role: true } },
-      },
-      orderBy: { publishedAt: "desc" },
-      take: 50,
-    });
+  async posts(@Query() query: ForumPostsQueryDto) {
+    const search = query.q?.trim();
+    const where: Prisma.ForumPostWhereInput = search
+      ? {
+          OR: [
+            { title: { contains: search, mode: "insensitive" } },
+            { content: { contains: search, mode: "insensitive" } },
+            {
+              author: {
+                displayName: { contains: search, mode: "insensitive" },
+              },
+            },
+          ],
+        }
+      : {};
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.forumPost.findMany({
+        where,
+        select: {
+          id: true,
+          title: true,
+          content: true,
+          publishedAt: true,
+          updatedAt: true,
+          author: { select: { id: true, displayName: true, role: true } },
+        },
+        orderBy: {
+          publishedAt: query.sort === "OLDEST" ? "asc" : "desc",
+        },
+        skip: (query.page - 1) * query.pageSize,
+        take: query.pageSize,
+      }),
+      this.prisma.forumPost.count({ where }),
+    ]);
+    return {
+      items,
+      total,
+      page: query.page,
+      pageSize: query.pageSize,
+      totalPages: Math.max(1, Math.ceil(total / query.pageSize)),
+    };
   }
 
   @Post("posts")

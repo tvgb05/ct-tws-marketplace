@@ -171,8 +171,8 @@ export default function LoginPage() {
             <em>mua bán tử tế.</em>
           </h1>
           <p>
-            Đăng nhập nhanh bằng Google hoặc nhận mã xác nhận qua email. Hệ
-            thống tự nhận diện quyền tài khoản; bạn không cần chọn vai trò.
+            Đăng nhập nhanh bằng Google hoặc nhận mã xác nhận qua email. Chúng
+            tôi không yêu cầu mật khẩu email của bạn.
           </p>
           {loading ? (
             <div className="auth-loading">
@@ -339,11 +339,10 @@ export default function LoginPage() {
           <div className="auth-security">
             <ShieldCheck size={18} />
             <span>
-              <strong>Quyền được nhận diện tự động</strong>
+              <strong>Phiên đăng nhập được bảo vệ</strong>
               <small>
-                Google phải cung cấp email đã xác minh. Email có nhãn admin
-                trong database sẽ vào trang quản trị; các email khác mặc định là
-                thành viên. OTP từ taskflow-planner chỉ dùng một lần.
+                Google phải cung cấp email đã xác minh. OTP từ taskflow-planner
+                chỉ dùng một lần và hết hạn sau 10 phút.
               </small>
             </span>
           </div>
