@@ -130,6 +130,8 @@ tồn tại, nhưng không còn là lựa chọn đăng nhập chính.
 - Tab admin trên trang đăng nhập chung dùng email/mật khẩu, giới hạn số lần thử và cho phép admin đang hoạt động cấp thêm tài khoản admin. Admin không đăng nhập qua Google hoặc OTP.
 - Sau giao dịch hoàn tất, người mua và người bán có thể đánh giá đối phương một lần với thang 1–5 sao. Hồ sơ thành viên công khai số giao dịch bán hoàn tất, điểm trung bình và các đánh giá gần đây gắn với bài đăng thực tế.
 - Thành viên có thể tố cáo tài khoản khác; phiếu tố cáo được lưu riêng và hiển thị trong dashboard admin. Khi xác nhận vi phạm, admin có thể khóa riêng quyền đăng bài mà không khóa đăng nhập, ghi lý do xử lý và cấp lại quyền sau đó. Mỗi thay đổi đều tạo thông báo chưa đọc cho thành viên và audit log cho admin.
+- Forum nằm trong trang quy tắc/FAQ. Admin có thể đăng hướng dẫn hoặc cảnh báo mới; mỗi bài tạo thông báo chưa đọc cho toàn bộ thành viên đang hoạt động và vẫn được lưu để xem lại trên Forum.
+- Dashboard quản trị có danh sách thành viên đăng nhập trong 30 ngày, tài khoản bị khóa quyền đăng và hai hàng đợi báo cáo. Các danh sách dùng truy vấn phía server, hỗ trợ tìm kiếm, lọc trạng thái và phân trang.
 - Prisma domain model cho user, auth identity, listing, image, favorite, report, mediation, notification và audit log.
 - API public listing/category và các endpoint có xác thực cho tạo bài, xem liên hệ, report, trung gian.
 - Chế độ đăng nhiều món dùng chung một bộ ảnh: hệ thống tạo listing, giá và trạng thái giao dịch độc lập cho từng món. Ảnh được lưu cục bộ khi phát triển hoặc tự động chuyển sang Cloudinary khi cấu hình đủ ba biến `CLOUDINARY_*`.
@@ -147,6 +149,12 @@ Kiểm thử end-to-end bằng đúng hai tài khoản demo đã seed, bao gồm
 
 ```bash
 pnpm test:demo-flow
+```
+
+Kiểm thử Forum, thông báo toàn hệ thống và các API phân trang quản trị:
+
+```bash
+pnpm test:forum-admin
 ```
 
 - Form đăng bán ba bước, trang tài khoản, admin dashboard, quy tắc, privacy và terms.

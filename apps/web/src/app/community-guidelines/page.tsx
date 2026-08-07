@@ -11,6 +11,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { ADMIN_FACEBOOK_URL, FEEDBACK_FORM_URL } from "@/lib/constants";
+import { ForumBoard } from "@/features/forum/forum-board";
 
 const rules = [
   {
@@ -170,6 +171,8 @@ export default function GuidelinesPage() {
           <Link href="/terms">Điều khoản sử dụng</Link>
         </p>
       </section>
+
+      <ForumBoard />
 
       <section
         className="admin-contact-section"

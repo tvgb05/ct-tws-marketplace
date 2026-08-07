@@ -21,6 +21,7 @@
     "test:reputation": "pnpm --filter @tws/api test:reputation",
     "test:inventory": "pnpm --filter @tws/api test:inventory",
     "test:demo-flow": "pnpm --filter @tws/api test:demo-flow",
+    "test:forum-admin": "pnpm --filter @tws/api test:forum-admin",
     "test:security": "pnpm --filter @tws/api test:security && pnpm --filter @tws/web test:security",
     "admin:create": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/create-admin.ps1",
     "strix": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/strix.ps1",

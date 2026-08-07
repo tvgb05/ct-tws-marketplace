@@ -15,6 +15,7 @@
     "test:reputation": "tsx --env-file=../../.env prisma/reputation-e2e.ts",
     "test:inventory": "tsx --env-file=../../.env prisma/inventory-e2e.ts",
     "test:demo-flow": "tsx --env-file=../../.env prisma/demo-accounts-e2e.ts",
+    "test:forum-admin": "tsx --env-file=../../.env prisma/forum-admin-e2e.ts",
     "test:security": "tsx prisma/security-regression.ts"
   },
   "dependencies": {

@@ -10,10 +10,16 @@ import {
   Patch,
   Post,
   ParseEnumPipe,
+  Query,
   UseGuards,
 } from "@nestjs/common";
 import { ApiCookieAuth, ApiTags } from "@nestjs/swagger";
-import { MarketplaceAdPlacement, type User } from "@prisma/client";
+import {
+  MarketplaceAdPlacement,
+  Prisma,
+  ReportStatus,
+  type User,
+} from "@prisma/client";
 import { CurrentUser } from "../auth/current-user.decorator";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { PrismaService } from "../prisma/prisma.service";
@@ -22,6 +28,10 @@ import { CreateAdminAccountDto } from "./dto/create-admin-account.dto";
 import { ResolveUserReportDto } from "./dto/resolve-user-report.dto";
 import { SetPostingPermissionDto } from "./dto/set-posting-permission.dto";
 import { UpdateMarketplaceAdDto } from "./dto/update-marketplace-ad.dto";
+import {
+  AdminReportsQueryDto,
+  AdminUsersQueryDto,
+} from "./dto/admin-list-query.dto";
 
 @ApiTags("admin")
 @ApiCookieAuth("tws_session")
@@ -35,18 +45,24 @@ export class AdminController {
   @Get("overview")
   async overview(@CurrentUser() user: User) {
     if (user.role !== "ADMIN") throw new ForbiddenException();
+    const activeSince = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const [
       listings,
       users,
+      activeUsers,
       listingOpenReports,
       userOpenReports,
       activeMediations,
-      recentReports,
-      recentUserReports,
-      restrictedUsers,
     ] = await this.prisma.$transaction([
       this.prisma.listing.count({ where: { deletedAt: null } }),
       this.prisma.user.count(),
+      this.prisma.user.count({
+        where: {
+          role: "USER",
+          status: "ACTIVE",
+          lastLoginAt: { gte: activeSince },
+        },
+      }),
       this.prisma.report.count({
         where: { status: { in: ["OPEN", "REVIEWING"] } },
       }),
@@ -65,17 +81,102 @@ export class AdminController {
           },
         },
       }),
-      this.prisma.report.findMany({
-        where: { status: { in: ["OPEN", "REVIEWING"] } },
-        include: {
-          listing: { select: { id: true, slug: true, title: true } },
-          reporter: { select: { id: true, displayName: true, role: true } },
+    ]);
+    return {
+      listings,
+      users,
+      activeUsers,
+      openReports: listingOpenReports + userOpenReports,
+      activeMediations,
+    };
+  }
+
+  @Get("users")
+  async users(@Query() query: AdminUsersQueryDto, @CurrentUser() user: User) {
+    if (user.role !== "ADMIN") throw new ForbiddenException();
+    const page = query.page;
+    const pageSize = query.pageSize;
+    const q = query.q?.trim();
+    const activeSince = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const where = {
+      ...(query.scope === "RESTRICTED"
+        ? { role: "USER" as const, canPostListings: false }
+        : {
+            role: "USER" as const,
+            status: "ACTIVE" as const,
+            lastLoginAt: { gte: activeSince },
+          }),
+      ...(q
+        ? {
+            OR: [
+              { displayName: { contains: q, mode: "insensitive" as const } },
+              { email: { contains: q, mode: "insensitive" as const } },
+            ],
+          }
+        : {}),
+    };
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.user.findMany({
+        where,
+        select: {
+          id: true,
+          displayName: true,
+          email: true,
+          role: true,
+          status: true,
+          lastLoginAt: true,
+          canPostListings: true,
+          postingRestrictionReason: true,
+          postingRestrictedAt: true,
         },
-        orderBy: { createdAt: "desc" },
-        take: 10,
+        orderBy:
+          query.scope === "RESTRICTED"
+            ? { postingRestrictedAt: "desc" }
+            : { lastLoginAt: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
       }),
+      this.prisma.user.count({ where }),
+    ]);
+    return this.paginated(items, total, page, pageSize);
+  }
+
+  @Get("user-reports")
+  async userReports(
+    @Query() query: AdminReportsQueryDto,
+    @CurrentUser() user: User,
+  ) {
+    if (user.role !== "ADMIN") throw new ForbiddenException();
+    const { page, pageSize } = query;
+    const q = query.q?.trim();
+    const where: Prisma.UserReportWhereInput = {
+      status:
+        query.status === "ALL"
+          ? { in: [ReportStatus.OPEN, ReportStatus.REVIEWING] }
+          : query.status === "OPEN"
+            ? ReportStatus.OPEN
+            : ReportStatus.REVIEWING,
+      ...(q
+        ? {
+            OR: [
+              { description: { contains: q, mode: "insensitive" as const } },
+              {
+                reporter: {
+                  displayName: { contains: q, mode: "insensitive" as const },
+                },
+              },
+              {
+                reportedUser: {
+                  displayName: { contains: q, mode: "insensitive" as const },
+                },
+              },
+            ],
+          }
+        : {}),
+    };
+    const [items, total] = await this.prisma.$transaction([
       this.prisma.userReport.findMany({
-        where: { status: { in: ["OPEN", "REVIEWING"] } },
+        where,
         select: {
           id: true,
           reason: true,
@@ -96,30 +197,66 @@ export class AdminController {
           },
         },
         orderBy: { createdAt: "desc" },
-        take: 20,
+        skip: (page - 1) * pageSize,
+        take: pageSize,
       }),
-      this.prisma.user.findMany({
-        where: { role: "USER", canPostListings: false },
+      this.prisma.userReport.count({ where }),
+    ]);
+    return this.paginated(items, total, page, pageSize);
+  }
+
+  @Get("listing-reports")
+  async listingReports(
+    @Query() query: AdminReportsQueryDto,
+    @CurrentUser() user: User,
+  ) {
+    if (user.role !== "ADMIN") throw new ForbiddenException();
+    const { page, pageSize } = query;
+    const q = query.q?.trim();
+    const where: Prisma.ReportWhereInput = {
+      status:
+        query.status === "ALL"
+          ? { in: [ReportStatus.OPEN, ReportStatus.REVIEWING] }
+          : query.status === "OPEN"
+            ? ReportStatus.OPEN
+            : ReportStatus.REVIEWING,
+      ...(q
+        ? {
+            OR: [
+              { description: { contains: q, mode: "insensitive" as const } },
+              {
+                listing: {
+                  title: { contains: q, mode: "insensitive" as const },
+                },
+              },
+              {
+                reporter: {
+                  displayName: { contains: q, mode: "insensitive" as const },
+                },
+              },
+            ],
+          }
+        : {}),
+    };
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.report.findMany({
+        where,
         select: {
           id: true,
-          displayName: true,
-          email: true,
-          postingRestrictionReason: true,
-          postingRestrictedAt: true,
+          reason: true,
+          description: true,
+          status: true,
+          createdAt: true,
+          listing: { select: { id: true, slug: true, title: true } },
+          reporter: { select: { id: true, displayName: true, role: true } },
         },
-        orderBy: { postingRestrictedAt: "desc" },
-        take: 50,
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
       }),
+      this.prisma.report.count({ where }),
     ]);
-    return {
-      listings,
-      users,
-      openReports: listingOpenReports + userOpenReports,
-      activeMediations,
-      recentReports,
-      recentUserReports,
-      restrictedUsers,
-    };
+    return this.paginated(items, total, page, pageSize);
   }
 
   @Patch("user-reports/:reportId/resolve")
@@ -375,5 +512,20 @@ export class AdminController {
   ) {
     if (user.role !== "ADMIN") throw new ForbiddenException();
     return this.auth.revokeAdminAccount(credentialId, user.id);
+  }
+
+  private paginated<T>(
+    items: T[],
+    total: number,
+    page: number,
+    pageSize: number,
+  ) {
+    return {
+      items,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.max(1, Math.ceil(total / pageSize)),
+    };
   }
 }

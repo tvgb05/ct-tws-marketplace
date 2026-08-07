@@ -49,6 +49,7 @@ model User {
   userReportsSubmitted     UserReport[]        @relation("UserReportReporter")
   userReportsReceived      UserReport[]        @relation("UserReportSubject")
   handledUserReports       UserReport[]        @relation("UserReportHandler")
+  forumPosts               ForumPost[]         @relation("ForumPostAuthor")
 }
 
 model AdminCredential {
@@ -310,6 +311,19 @@ model Notification {
   @@index([userId, readAt])
 }
 
+model ForumPost {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  authorId    String
+  publishedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  author      User     @relation("ForumPostAuthor", fields: [authorId], references: [id])
+
+  @@index([publishedAt])
+  @@index([authorId])
+}
+
 model AuditLog {
   id         String   @id @default(cuid())
   actorId    String?
@@ -420,6 +434,7 @@ enum NotificationType {
   TRADE_COMPLETED
   TRADE_CANCELLED
   REVIEW_RECEIVED
+  FORUM_POSTED
   SYSTEM
 }
 

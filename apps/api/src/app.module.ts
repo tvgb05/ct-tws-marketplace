@@ -7,6 +7,7 @@ import { AuthModule } from "./auth/auth.module";
 import { CategoriesModule } from "./categories/categories.module";
 import { HealthController } from "./health.controller";
 import { FavoritesModule } from "./favorites/favorites.module";
+import { ForumModule } from "./forum/forum.module";
 import { ListingsModule } from "./listings/listings.module";
 import { MediationModule } from "./mediation/mediation.module";
 import { NotificationsModule } from "./notifications/notifications.module";
@@ -27,6 +28,7 @@ import { UsersModule } from "./users/users.module";
     CategoriesModule,
     ListingsModule,
     FavoritesModule,
+    ForumModule,
     ReportsModule,
     MediationModule,
     TradesModule,

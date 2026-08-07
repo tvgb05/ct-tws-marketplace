@@ -3062,7 +3062,7 @@ html[data-theme="dark"] .theme-toggle .theme-icon-sun {
 }
 .admin-stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 13px;
   margin-bottom: 35px;
 }
@@ -3512,6 +3512,171 @@ html[data-theme="dark"] .theme-toggle .theme-icon-sun {
   text-transform: uppercase;
   letter-spacing: 0.07em;
 }
+.admin-table-scroll {
+  width: 100%;
+  padding: 0 !important;
+  display: block !important;
+  overflow-x: auto;
+  border-bottom: 0 !important;
+}
+.admin-table td > small,
+.admin-table td > strong {
+  display: block;
+}
+.admin-table td > small {
+  margin-top: 5px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+.admin-table-controls {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(190px, auto) auto;
+  gap: 9px;
+  background: #f8f9f6;
+}
+.admin-table-controls label {
+  min-height: 40px;
+  padding: 0 11px;
+  border: 1px solid #d5dbd7;
+  background: white;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-soft);
+}
+.admin-table-controls input,
+.admin-table-controls select {
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: white;
+  color: var(--ink);
+  font: inherit;
+  font-size: 10px;
+}
+.admin-table-controls input {
+  width: 100%;
+}
+.admin-table-controls select {
+  min-height: 40px;
+  padding: 0 10px;
+  border: 1px solid #d5dbd7;
+}
+.admin-table-controls > button {
+  min-height: 40px;
+  padding: 0 16px;
+  background: var(--pine);
+  color: white;
+  justify-content: center;
+  font-weight: 700;
+}
+.admin-pagination {
+  padding: 12px 16px !important;
+  display: flex !important;
+  border-top: 1px solid var(--line);
+  border-bottom: 0 !important;
+  color: var(--ink-soft);
+  font-size: 9px;
+}
+.admin-pagination > div {
+  display: flex;
+  gap: 6px;
+}
+.admin-pagination button {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  color: var(--pine);
+}
+.admin-pagination button:disabled {
+  opacity: 0.35;
+}
+.admin-forum-panel {
+  margin: 0 0 28px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+}
+.admin-forum-panel > header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.admin-forum-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  background: #edf3ea;
+  color: var(--pine);
+}
+.admin-forum-panel h2 {
+  margin: 0 0 4px;
+  font-family: var(--font-serif);
+  font-size: 20px;
+}
+.admin-forum-panel header p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 9px;
+  line-height: 1.6;
+}
+.admin-forum-panel form,
+.admin-forum-panel label {
+  display: grid;
+  gap: 7px;
+}
+.admin-forum-panel form {
+  grid-template-columns: minmax(220px, 0.7fr) minmax(300px, 1.3fr);
+  align-items: end;
+  gap: 12px;
+}
+.admin-forum-panel label > span {
+  color: var(--ink-soft);
+  font-size: 9px;
+  font-weight: 700;
+}
+.admin-forum-panel input,
+.admin-forum-panel textarea {
+  width: 100%;
+  border: 1px solid #d5dbd7;
+  background: white;
+  padding: 11px 12px;
+  color: var(--ink);
+  font: inherit;
+  font-size: 10px;
+  outline: 0;
+}
+.admin-forum-panel input {
+  min-height: 44px;
+}
+.admin-forum-panel textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+.admin-forum-panel .button,
+.admin-forum-panel .admin-form-message {
+  grid-column: 1 / -1;
+}
+.admin-forum-panel .button {
+  width: max-content;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 .legal-page {
   width: min(1050px, calc(100% - 48px));
   margin: auto;
@@ -3686,6 +3851,66 @@ html[data-theme="dark"] .theme-toggle .theme-icon-sun {
 .faq-legal-links a {
   color: var(--pine);
   border-bottom: 1px solid #aebbb4;
+}
+.community-forum {
+  margin: 54px 0 46px;
+  scroll-margin-top: 96px;
+}
+.forum-post-list {
+  display: grid;
+  gap: 12px;
+}
+.forum-post-list article,
+.forum-empty {
+  border: 1px solid #dfe2dc;
+  background: white;
+}
+.forum-post-list article {
+  padding: 20px 22px;
+  scroll-margin-top: 96px;
+}
+.forum-post-list article > header {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.forum-post-icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  flex: 0 0 auto;
+  background: #edf3ea;
+  color: var(--pine);
+}
+.forum-post-list h3 {
+  margin: 0 0 4px;
+  font-family: var(--font-serif);
+  font-size: 18px;
+}
+.forum-post-list small {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-soft);
+  font-size: 8px;
+}
+.forum-post-list article > p {
+  margin: 15px 0 0 49px;
+  color: var(--ink-soft);
+  font-size: 10px;
+  line-height: 1.75;
+  white-space: pre-wrap;
+}
+.forum-empty {
+  min-height: 90px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--ink-soft);
+  font-size: 10px;
 }
 .admin-contact-section {
   display: grid;
@@ -5303,6 +5528,8 @@ html[data-theme="dark"] .shared-photo-items {
   padding: 26px;
   border: 1px solid var(--line);
   background: var(--paper);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
 }
 
 .guide-flow > header {
@@ -5468,8 +5695,39 @@ html[data-theme="dark"] .buyer-flow .guide-step-icon {
   background: #1d3048;
 }
 
+html[data-theme="dark"] .forum-post-list article,
+html[data-theme="dark"] .forum-empty,
+html[data-theme="dark"] .admin-forum-panel,
+html[data-theme="dark"] .admin-table-controls {
+  background: #162337;
+  border-color: var(--line);
+}
+
+html[data-theme="dark"] .forum-post-icon,
+html[data-theme="dark"] .admin-forum-icon {
+  background: #213b35;
+}
+
+html[data-theme="dark"] .admin-table-controls label,
+html[data-theme="dark"] .admin-table-controls input,
+html[data-theme="dark"] .admin-table-controls select,
+html[data-theme="dark"] .admin-forum-panel input,
+html[data-theme="dark"] .admin-forum-panel textarea {
+  background: #111d2e;
+  border-color: #35445a;
+  color: #d8e0eb;
+}
+
 @media (max-width: 900px) {
   .dual-guide {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-forum-panel form {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-table-controls {
     grid-template-columns: 1fr;
   }
 }
@@ -5495,6 +5753,10 @@ html[data-theme="dark"] .buyer-flow .guide-step-icon {
 
   .guide-hero h1 {
     font-size: 40px;
+  }
+
+  .forum-post-list article > p {
+    margin-left: 0;
   }
 }
 
