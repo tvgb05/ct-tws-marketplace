@@ -4,7 +4,6 @@ import {
   ArrowLeft,
   KeyRound,
   LoaderCircle,
-  LockKeyhole,
   Mail,
   ShieldCheck,
 } from "lucide-react";
@@ -30,13 +29,11 @@ function apiErrorMessage(body: unknown, fallback: string) {
 
 export default function LoginPage() {
   const { user, loading } = useAuth();
-  const [loginMode, setLoginMode] = useState<"member" | "admin">("member");
   const [rememberForThirtyDays, setRememberForThirtyDays] = useState(false);
   const [emailStep, setEmailStep] = useState<"request" | "verify">("request");
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
-  const [password, setPassword] = useState("");
   const [contactPrivacyAccepted, setContactPrivacyAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
@@ -53,14 +50,6 @@ export default function LoginPage() {
   const nextPath = requestedPath?.startsWith("/")
     ? requestedPath
     : "/marketplace";
-
-  useEffect(() => {
-    if (new URLSearchParams(window.location.search).get("mode") === "admin") {
-      // Preserve old /admin/login bookmarks while keeping one login page.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLoginMode("admin");
-    }
-  }, []);
 
   useEffect(() => {
     if (!loading && user) {
@@ -154,57 +143,6 @@ export default function LoginPage() {
     }
   }
 
-  async function loginWithPassword(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setSubmitting(true);
-    setError("");
-    setMessage("");
-    try {
-      const response = await fetch(`${apiUrl}/auth/admin/login`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          password,
-          remember: rememberForThirtyDays,
-        }),
-      });
-      const body = (await response.json().catch(() => null)) as {
-        role?: "USER" | "ADMIN";
-      } | null;
-      if (!response.ok) {
-        throw new Error(
-          response.status === 429
-            ? "Bạn đã thử quá nhiều lần. Vui lòng đợi một phút rồi thử lại."
-            : apiErrorMessage(body, "Email hoặc mật khẩu không chính xác."),
-        );
-      }
-      window.location.assign(body?.role === "ADMIN" ? "/admin" : nextPath);
-    } catch (caught) {
-      setError(
-        caught instanceof Error
-          ? caught.message
-          : "Không thể kết nối máy chủ. Vui lòng thử lại.",
-      );
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  function changeMode(mode: "member" | "admin") {
-    setLoginMode(mode);
-    const url = new URL(window.location.href);
-    if (mode === "admin") url.searchParams.set("mode", "admin");
-    else url.searchParams.delete("mode");
-    window.history.replaceState(null, "", `${url.pathname}${url.search}`);
-    setEmailStep("request");
-    setCode("");
-    setPassword("");
-    setMessage("");
-    setError("");
-  }
-
   return (
     <main className="auth-page">
       <div className="auth-art">
@@ -233,39 +171,14 @@ export default function LoginPage() {
             <em>mua bán tử tế.</em>
           </h1>
           <p>
-            {loginMode === "member"
-              ? "Đăng nhập nhanh bằng Google hoặc nhận mã xác nhận qua email. Chúng tôi không yêu cầu mật khẩu email của bạn."
-              : "Admin và tài khoản demo nội bộ đăng nhập bằng email cùng mật khẩu được cấp."}
+            Đăng nhập nhanh bằng Google hoặc nhận mã xác nhận qua email. Hệ
+            thống tự nhận diện quyền tài khoản; bạn không cần chọn vai trò.
           </p>
-          <div
-            className="auth-mode-switch"
-            role="tablist"
-            aria-label="Loại tài khoản"
-          >
-            <button
-              type="button"
-              role="tab"
-              aria-selected={loginMode === "member"}
-              className={loginMode === "member" ? "active" : ""}
-              onClick={() => changeMode("member")}
-            >
-              <Mail size={16} /> Thành viên
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={loginMode === "admin"}
-              className={loginMode === "admin" ? "active" : ""}
-              onClick={() => changeMode("admin")}
-            >
-              <LockKeyhole size={16} /> Admin
-            </button>
-          </div>
           {loading ? (
             <div className="auth-loading">
               <LoaderCircle className="spin" /> Đang kiểm tra phiên đăng nhập…
             </div>
-          ) : loginMode === "member" ? (
+          ) : (
             <>
               {methods?.google ? (
                 <a
@@ -422,81 +335,16 @@ export default function LoginPage() {
                 </span>
               </label>
             </>
-          ) : (
-            <form
-              className="admin-login-form unified-admin-login"
-              onSubmit={loginWithPassword}
-            >
-              <label className="admin-form-field">
-                <span>Email đăng nhập</span>
-                <input
-                  type="email"
-                  autoComplete="username"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  maxLength={254}
-                  placeholder="admin@example.com"
-                  required
-                />
-              </label>
-              <label className="admin-form-field">
-                <span>Mật khẩu</span>
-                <input
-                  type="password"
-                  autoComplete="current-password"
-                  minLength={8}
-                  maxLength={128}
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  required
-                />
-              </label>
-              <label className="remember-login admin-remember-login">
-                <input
-                  type="checkbox"
-                  checked={rememberForThirtyDays}
-                  onChange={(event) =>
-                    setRememberForThirtyDays(event.target.checked)
-                  }
-                />
-                <span>
-                  <strong>Duy trì đăng nhập trong 30 ngày</strong>
-                  <small>Chỉ nên chọn trên thiết bị cá nhân an toàn.</small>
-                </span>
-              </label>
-              {error && <div className="admin-auth-error">{error}</div>}
-              <button
-                type="submit"
-                className="admin-login-submit"
-                disabled={submitting}
-              >
-                {submitting ? (
-                  <LoaderCircle className="spin" size={18} />
-                ) : (
-                  <LockKeyhole size={18} />
-                )}
-                {submitting ? "Đang đăng nhập…" : "Đăng nhập"}
-              </button>
-            </form>
           )}
           <div className="auth-security">
             <ShieldCheck size={18} />
             <span>
-              <strong>
-                {loginMode === "member"
-                  ? "Mã OTP chỉ dùng một lần"
-                  : "Phiên quản trị được bảo vệ"}
-              </strong>
-              {loginMode === "member" ? (
-                <small>
-                  Mã từ taskflow-planner hết hạn sau 10 phút. Nếu chưa thấy, hãy
-                  kiểm tra cả Spam/Thư rác.
-                </small>
-              ) : (
-                <small>
-                  Mật khẩu được băm và phiên nằm trong cookie HTTP-only.
-                </small>
-              )}
+              <strong>Quyền được nhận diện tự động</strong>
+              <small>
+                Google phải cung cấp email đã xác minh. Email có nhãn admin
+                trong database sẽ vào trang quản trị; các email khác mặc định là
+                thành viên. OTP từ taskflow-planner chỉ dùng một lần.
+              </small>
             </span>
           </div>
           <p className="auth-legal">

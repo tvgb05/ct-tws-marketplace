@@ -15,11 +15,7 @@ import { ApiTags } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
 import type { CookieOptions, Request, Response } from "express";
 import { CurrentUser } from "./current-user.decorator";
-import {
-  AuthService,
-  FacebookProfile,
-  GoogleProfile,
-} from "./auth.service";
+import { AuthService, FacebookProfile, GoogleProfile } from "./auth.service";
 import { JwtAuthGuard } from "./jwt-auth.guard";
 import type { User } from "@prisma/client";
 import { CompleteProfileDto } from "./dto/complete-profile.dto";
@@ -268,8 +264,7 @@ export class AuthController {
     rememberForThirtyDays: boolean,
   ) {
     const sessionCookie = this.cookieOptions();
-    if (rememberForThirtyDays)
-      sessionCookie.maxAge = 30 * 24 * 60 * 60 * 1000;
+    if (rememberForThirtyDays) sessionCookie.maxAge = 30 * 24 * 60 * 60 * 1000;
     response.cookie("tws_session", token, sessionCookie);
     response.clearCookie("tws_login_remember", this.cookieOptions());
   }
@@ -289,11 +284,15 @@ export class AuthController {
   }
 
   private loginDestination(user: {
+    role: "USER" | "ADMIN";
     profileCompletedAt: Date | null;
     phoneNumber: string | null;
     facebookProfileUrl: string | null;
     contactPrivacyAcceptedAt: Date | null;
   }) {
+    if (user.role === "ADMIN") {
+      return `${this.config.get("WEB_URL", "http://localhost:3000")}/admin`;
+    }
     const destination = this.profileCompleted(user)
       ? "/marketplace?login=success"
       : "/complete-profile";

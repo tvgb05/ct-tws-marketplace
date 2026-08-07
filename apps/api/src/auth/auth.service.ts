@@ -60,7 +60,56 @@ export class AuthService {
     );
   }
 
-  loginWithGoogle(profile: GoogleProfile, rememberForThirtyDays = false) {
+  async loginWithGoogle(profile: GoogleProfile, rememberForThirtyDays = false) {
+    const adminCredential = await this.prisma.adminCredential.findFirst({
+      where: {
+        email: { equals: profile.email, mode: "insensitive" },
+        user: { role: "ADMIN" },
+      },
+      include: { user: true },
+    });
+    if (adminCredential) {
+      if (adminCredential.user.status !== "ACTIVE")
+        throw new UnauthorizedException("Tài khoản đã bị hạn chế");
+
+      const user = await this.prisma.$transaction(async (tx) => {
+        await tx.authIdentity.upsert({
+          where: {
+            provider_providerUserId: {
+              provider: AuthProvider.GOOGLE,
+              providerUserId: profile.providerUserId,
+            },
+          },
+          create: {
+            userId: adminCredential.userId,
+            provider: AuthProvider.GOOGLE,
+            providerUserId: profile.providerUserId,
+          },
+          update: { userId: adminCredential.userId },
+        });
+        return tx.user.update({
+          where: { id: adminCredential.userId },
+          data: {
+            displayName: profile.displayName,
+            avatarUrl: profile.avatarUrl,
+            email: profile.email,
+            lastLoginAt: new Date(),
+          },
+        });
+      });
+      return {
+        user,
+        token: await this.jwt.signAsync(
+          {
+            sub: user.id,
+            role: user.role,
+            adminCredentialVersion: adminCredential.updatedAt.getTime(),
+          },
+          { expiresIn: rememberForThirtyDays ? "30d" : "15m" },
+        ),
+      };
+    }
+
     return this.loginWithIdentity(
       AuthProvider.GOOGLE,
       profile,
@@ -106,7 +155,7 @@ export class AuthService {
 
     if (identity?.user.role === "ADMIN")
       throw new UnauthorizedException(
-        "Tài khoản quản trị chỉ được đăng nhập bằng cổng quản trị",
+        "Tài khoản quản trị cần đăng nhập bằng Google đã xác minh",
       );
 
     const usersByEmail =
@@ -125,7 +174,7 @@ export class AuthService {
     const existingByEmail = usersByEmail[0] ?? null;
     if (existingByEmail?.role === "ADMIN")
       throw new UnauthorizedException(
-        "Tài khoản quản trị chỉ được đăng nhập bằng cổng quản trị",
+        "Tài khoản quản trị cần đăng nhập bằng Google đã xác minh",
       );
     const existingAccount = identity?.user ?? existingByEmail;
     if (existingAccount && existingAccount.status !== "ACTIVE")

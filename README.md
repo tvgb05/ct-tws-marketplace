@@ -67,9 +67,11 @@ pnpm dev:web
 
 ## Tài khoản quản trị
 
-Admin dùng email và mật khẩu tại `http://localhost:3000/login` bằng tab Admin, hoàn
-toàn tách khỏi Facebook Login. Mật khẩu được băm trước khi lưu và cookie phiên
-đăng nhập là HTTP-only.
+Mọi người dùng đăng nhập tại cùng trang `http://localhost:3000/login`, không cần
+chọn vai trò. Khi Google trả về email đã xác minh, backend đối chiếu email đó với
+credential mang role `ADMIN` trong database: nếu khớp thì mở đúng tài khoản admin
+và chuyển tới `/admin`; các email Google khác mặc định là `USER`. Vì vậy
+`SEED_ADMIN_EMAIL` phải trùng với email của tài khoản Google mà admin sẽ dùng.
 
 Để cấp tài khoản admin đầu tiên trên máy local, chạy:
 
@@ -77,10 +79,12 @@ toàn tách khỏi Facebook Login. Mật khẩu được băm trước khi lưu 
 pnpm admin:create
 ```
 
-Script sẽ hỏi tên, email và mật khẩu (tối thiểu 12 ký tự, có chữ hoa, chữ
-thường và chữ số). Sau khi đăng nhập, admin đầu tiên có thể mở trang
-`/admin` và dùng mục **Tài khoản quản trị** để cấp thêm admin. Không có tài
-khoản hoặc mật khẩu admin mặc định trong source code.
+Script sẽ hỏi tên, email và mật khẩu nội bộ (tối thiểu 12 ký tự, có chữ hoa,
+chữ thường và chữ số). Sau khi đăng nhập bằng Google với đúng email, admin đầu
+tiên có thể mở trang `/admin` và dùng mục **Tài khoản quản trị** để cấp thêm
+admin. Mật khẩu nội bộ được giữ làm phương án khôi phục/kiểm thử ở API và không
+còn là một chế độ đăng nhập riêng trên giao diện. Không có tài khoản hoặc mật
+khẩu admin mặc định trong source code.
 
 Ngoài bootstrap tương tác, `pnpm db:seed` có thể tạo admin đầu tiên từ ba biến
 `SEED_ADMIN_NAME`, `SEED_ADMIN_EMAIL` và `SEED_ADMIN_PASSWORD`. Seed chỉ tạo
@@ -94,11 +98,12 @@ và chữ số, đồng thời ghi lại sự kiện đổi mật khẩu trong a
 các phiên admin cũ bị vô hiệu hóa và admin cần đăng nhập lại.
 
 Hai tài khoản thành viên demo có thể được cấu hình bằng các nhóm biến
-`SEED_DEMO_USER_1_*` và `SEED_DEMO_USER_2_*`. Chúng đăng nhập tại `/login`
-bằng email/mật khẩu nhưng luôn giữ role `USER`, được chuyển về marketplace và
-không có quyền truy cập dashboard hay API quản trị. Seed chạy lặp lại an toàn và
-không ghi đè mật khẩu đã tồn tại. Thông tin liên hệ của tài khoản demo là dữ liệu
-giả lập, không đại diện cho người dùng thật và không nên bật trên production.
+`SEED_DEMO_USER_1_*` và `SEED_DEMO_USER_2_*`. Credential của chúng chỉ phục vụ
+kiểm thử backend; chúng luôn giữ role `USER`, không có quyền truy cập dashboard
+hay API quản trị và không xuất hiện thành một lựa chọn đăng nhập riêng trên web.
+Seed chạy lặp lại an toàn và không ghi đè mật khẩu đã tồn tại. Thông tin liên hệ
+của tài khoản demo là dữ liệu giả lập, không đại diện cho người dùng thật và
+không nên bật trên production.
 
 ## Cấu hình đăng nhập Google và email OTP
 
@@ -115,7 +120,8 @@ giả lập, không đại diện cho người dùng thật và không nên bậ
 6. Với production, đặt đúng `WEB_URL`, bật `COOKIE_SECURE=true` và dùng một
    `JWT_SECRET` ngẫu nhiên dài.
 
-Google chỉ được dùng khi trả về email đã xác minh. OTP email hết hạn sau 10
+Google chỉ được dùng khi trả về email đã xác minh và cũng là cách đăng nhập chung
+cho cả thành viên lẫn admin. Email OTP là luồng thành viên, hết hạn sau 10
 phút, tối đa 5 lần nhập sai, chỉ dùng một lần và được lưu dưới dạng bản băm.
 Người dùng xác nhận đã đọc cam kết bảo vệ số điện thoại và URL Facebook của nền
 tảng; thời điểm và phiên bản xác nhận được lưu cùng tài khoản. Nghĩa vụ sử dụng
@@ -127,7 +133,7 @@ tồn tại, nhưng không còn là lựa chọn đăng nhập chính.
 
 - Marketplace responsive, tìm kiếm, lọc danh mục/tình trạng, sắp xếp và trang chi tiết.
 - Google OAuth và email OTP do backend quản lý; application session không lưu trong localStorage. Người dùng có thể chọn cookie HTTP-only duy trì đăng nhập trong 30 ngày; nếu không chọn, cookie chỉ tồn tại theo phiên trình duyệt và JWT hết hạn sau 15 phút.
-- Tab admin trên trang đăng nhập chung dùng email/mật khẩu, giới hạn số lần thử và cho phép admin đang hoạt động cấp thêm tài khoản admin. Admin không đăng nhập qua Google hoặc OTP.
+- Trang đăng nhập không yêu cầu chọn vai trò. Google email đã xác minh khớp credential `ADMIN` sẽ vào dashboard; mọi Google email khác mặc định là thành viên. Email OTP vẫn là luồng thành viên, còn mật khẩu admin nội bộ chỉ được giữ làm phương án khôi phục/kiểm thử API.
 - Sau giao dịch hoàn tất, người mua và người bán có thể đánh giá đối phương một lần với thang 1–5 sao. Hồ sơ thành viên công khai số giao dịch bán hoàn tất, điểm trung bình và các đánh giá gần đây gắn với bài đăng thực tế.
 - Thành viên có thể tố cáo tài khoản khác; phiếu tố cáo được lưu riêng và hiển thị trong dashboard admin. Khi xác nhận vi phạm, admin có thể khóa riêng quyền đăng bài mà không khóa đăng nhập, ghi lý do xử lý và cấp lại quyền sau đó. Mỗi thay đổi đều tạo thông báo chưa đọc cho thành viên và audit log cho admin.
 - Forum nằm trong trang quy tắc/FAQ. Admin có thể đăng hướng dẫn hoặc cảnh báo mới; mỗi bài tạo thông báo chưa đọc cho toàn bộ thành viên đang hoạt động và vẫn được lưu để xem lại trên Forum.
