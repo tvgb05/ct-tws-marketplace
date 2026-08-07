@@ -13,6 +13,7 @@ import {
 import { useEffect, useState } from "react";
 import { AdminAccountManager } from "@/features/admin/admin-account-manager";
 import { AdminForumManager } from "@/features/admin/admin-forum-manager";
+import { AdminMediationQueue } from "@/features/admin/admin-mediation-queue";
 import {
   AdminModerationQueues,
   AdminUserDirectory,
@@ -129,6 +130,7 @@ export default function AdminPage() {
           <AdminAccountManager />
           <AdminForumManager />
           {/* MarketplaceAdManager tạm thời được ẩn; API và dữ liệu quảng cáo được giữ nguyên. */}
+          <AdminMediationQueue />
           <AdminTradeConfirmations />
           <AdminUserDirectory />
           <AdminModerationQueues />

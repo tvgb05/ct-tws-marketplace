@@ -29,7 +29,16 @@ const activeTradeInclude = {
       orderCode: true,
     },
   },
-  mediationRequest: { select: { id: true, status: true } },
+  mediationRequest: {
+    select: {
+      id: true,
+      status: true,
+      assignedAdminId: true,
+      admin: {
+        select: { id: true, displayName: true, avatarUrl: true, role: true },
+      },
+    },
+  },
   reviews: {
     select: {
       id: true,
@@ -72,7 +81,9 @@ export class TradesService {
       if (listing.status === "SOLD" || listing.status === "HIDDEN")
         throw new BadRequestException("Sản phẩm không còn nhận giao dịch mới");
       if (listing.sellerId === buyer.id)
-        throw new BadRequestException("Bạn không thể mua sản phẩm của chính mình");
+        throw new BadRequestException(
+          "Bạn không thể mua sản phẩm của chính mình",
+        );
       if (!Number.isInteger(requestedQuantity) || requestedQuantity < 1)
         throw new BadRequestException("Số lượng mua không hợp lệ");
       if (requestedQuantity > listing.totalQuantity)
@@ -101,7 +112,9 @@ export class TradesService {
       const status = allocatedQuantity > 0 ? "ACTIVE" : "QUEUED";
       const queuedCount =
         status === "QUEUED"
-          ? await tx.listingTrade.count({ where: { listingId, status: "QUEUED" } })
+          ? await tx.listingTrade.count({
+              where: { listingId, status: "QUEUED" },
+            })
           : 0;
       const queuePosition = status === "QUEUED" ? queuedCount + 1 : null;
       const trade = await tx.listingTrade.create({
@@ -164,11 +177,7 @@ export class TradesService {
           },
         ],
       });
-      return this.tradeResult(
-        trade,
-        updatedListing,
-        status === "ACTIVE",
-      );
+      return this.tradeResult(trade, updatedListing, status === "ACTIVE");
     });
   }
 
@@ -176,7 +185,7 @@ export class TradesService {
     return this.prisma.listingTrade.findMany({
       where:
         user.role === "ADMIN"
-          ? {}
+          ? { mediationRequest: { assignedAdminId: user.id } }
           : { OR: [{ sellerId: user.id }, { buyerId: user.id }] },
       include: activeTradeInclude,
       orderBy: [{ status: "asc" }, { createdAt: "desc" }],
@@ -257,21 +266,31 @@ export class TradesService {
     if (trade.sellerId !== seller.id)
       throw new ForbiddenException("Chỉ người bán có thể hoàn tất giao dịch");
     if (trade.status !== "ACTIVE")
-      throw new BadRequestException("Giao dịch này không ở trạng thái đang thực hiện");
+      throw new BadRequestException(
+        "Giao dịch này không ở trạng thái đang thực hiện",
+      );
     if (trade.mediationRequestId)
-      throw new BadRequestException("Giao dịch trung gian cần admin xác nhận hoàn tất");
+      throw new BadRequestException(
+        "Giao dịch trung gian cần admin xác nhận hoàn tất",
+      );
     return this.finishTrade(tradeId, seller.id, false);
   }
 
   async adminComplete(tradeId: string, admin: User) {
     if (admin.role !== "ADMIN")
-      throw new ForbiddenException("Chỉ admin có thể xác nhận giao dịch trung gian");
+      throw new ForbiddenException(
+        "Chỉ admin có thể xác nhận giao dịch trung gian",
+      );
     const trade = await this.prisma.listingTrade.findUnique({
       where: { id: tradeId },
       include: activeTradeInclude,
     });
     if (!trade?.mediationRequestId)
       throw new BadRequestException("Đây không phải giao dịch trung gian");
+    if (trade.mediationRequest?.assignedAdminId !== admin.id)
+      throw new ForbiddenException(
+        "Chỉ admin đã nhận phụ trách mới có thể xác nhận giao dịch này",
+      );
     return this.finishTrade(tradeId, admin.id, true);
   }
 
@@ -410,6 +429,11 @@ export class TradesService {
         data: { status: "CANCELLED", cancelledAt: new Date() },
         include: activeTradeInclude,
       });
+      if (trade.mediationRequestId)
+        await tx.mediationRequest.update({
+          where: { id: trade.mediationRequestId },
+          data: { status: "CANCELLED", cancelledAt: new Date() },
+        });
       const releasedListing = {
         ...listing,
         reservedQuantity: Math.max(
@@ -440,6 +464,17 @@ export class TradesService {
               : "Số lượng vừa giữ đã được trả lại tồn kho.",
             targetUrl: "/account/listings",
           },
+          ...(trade.mediationRequest?.assignedAdminId
+            ? [
+                {
+                  userId: trade.mediationRequest.assignedAdminId,
+                  type: "MEDIATION_UPDATED" as const,
+                  title: `${identityLabel(trade.seller)} đã dừng giao dịch trung gian`,
+                  message: `${trade.allocatedQuantity} × ${trade.listing.title} không còn cần admin xử lý.`,
+                  targetUrl: "/admin#mediation-queue",
+                },
+              ]
+            : []),
         ],
       });
       return {

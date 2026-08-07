@@ -49,6 +49,11 @@ export function ListingDetail({ item }: { item: MarketplaceListing }) {
   const [interestStatus, setInterestStatus] = useState<
     "ACTIVE" | "QUEUED" | null
   >(null);
+  const [assignedAdmin, setAssignedAdmin] = useState<{
+    id: string;
+    displayName: string;
+    role: "USER" | "ADMIN";
+  } | null>(null);
   const [requesting, setRequesting] = useState(false);
   const [contact, setContact] = useState<{
     type: string;
@@ -67,6 +72,13 @@ export function ListingDetail({ item }: { item: MarketplaceListing }) {
       const trades = (await response.json()) as Array<{
         status: "ACTIVE" | "QUEUED" | "COMPLETED" | "CANCELLED" | "DECLINED";
         listing: { id: string };
+        mediationRequest: {
+          admin: {
+            id: string;
+            displayName: string;
+            role: "USER" | "ADMIN";
+          } | null;
+        } | null;
       }>;
       const current = trades.find(
         (trade) =>
@@ -78,6 +90,7 @@ export function ListingDetail({ item }: { item: MarketplaceListing }) {
           ? current.status
           : null,
       );
+      setAssignedAdmin(current?.mediationRequest?.admin ?? null);
     });
   }, [item.id, ownListing, user]);
 
@@ -259,17 +272,33 @@ export function ListingDetail({ item }: { item: MarketplaceListing }) {
           />
           <div className="detail-price">{formatPrice(Number(item.price))}</div>
           <div className="inventory-summary">
-            <span><small>Tổng số lượng</small><strong>{inventory.totalQuantity}</strong></span>
-            <span><small>Còn có thể đặt</small><strong>{inventory.availableQuantity}</strong></span>
-            <span><small>Đang giao dịch</small><strong>{inventory.inTransactionQuantity}</strong></span>
-            <span><small>Đã bán</small><strong>{inventory.soldQuantity}</strong></span>
+            <span>
+              <small>Tổng số lượng</small>
+              <strong>{inventory.totalQuantity}</strong>
+            </span>
+            <span>
+              <small>Còn có thể đặt</small>
+              <strong>{inventory.availableQuantity}</strong>
+            </span>
+            <span>
+              <small>Đang giao dịch</small>
+              <strong>{inventory.inTransactionQuantity}</strong>
+            </span>
+            <span>
+              <small>Đã bán</small>
+              <strong>{inventory.soldQuantity}</strong>
+            </span>
           </div>
           {item.sharedPhotoItemCount && item.sharedPhotoItemCount > 1 && (
             <div className="shared-photo-context">
               <ImagePlus size={18} />
               <span>
-                <strong>Ảnh này chụp chung {item.sharedPhotoItemCount} món</strong>
-                <small>Giá và trạng thái phía trên chỉ áp dụng cho “{item.title}”.</small>
+                <strong>
+                  Ảnh này chụp chung {item.sharedPhotoItemCount} món
+                </strong>
+                <small>
+                  Giá và trạng thái phía trên chỉ áp dụng cho “{item.title}”.
+                </small>
               </span>
             </div>
           )}
@@ -346,6 +375,19 @@ export function ListingDetail({ item }: { item: MarketplaceListing }) {
                 </button>
               )}
           </div>
+          {assignedAdmin && (
+            <Link
+              className="assigned-admin-link"
+              href={`/users/${assignedAdmin.id}`}
+            >
+              <ShieldCheck size={17} />
+              <span>
+                <small>ADMIN TRUNG GIAN PHỤ TRÁCH</small>
+                <strong>{assignedAdmin.displayName}</strong>
+              </span>
+              <AdminBadge role={assignedAdmin.role} />
+            </Link>
+          )}
           <div className="safety-note">
             <AlertTriangle size={17} />
             <p>
@@ -480,7 +522,8 @@ export function ListingDetail({ item }: { item: MarketplaceListing }) {
                 />
                 <small>
                   Hiện còn {inventory.availableQuantity} sản phẩm chưa được giữ.
-                  Nếu không đủ, hệ thống chỉ cấp phần còn lại; hết hàng sẽ vào queue.
+                  Nếu không đủ, hệ thống chỉ cấp phần còn lại; hết hàng sẽ vào
+                  queue.
                 </small>
               </label>
             )}

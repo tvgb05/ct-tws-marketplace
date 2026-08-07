@@ -38,7 +38,6 @@ export default function CompleteProfilePage() {
     const requestBody = {
       phoneNumber,
       facebookProfileUrl,
-      contactPrivacyAccepted: formData.get("contactPrivacyAccepted") === "on",
     };
     setSaving(true);
     setError("");
@@ -145,39 +144,23 @@ export default function CompleteProfilePage() {
               dán đúng URL trang cá nhân mà bạn dùng để giao dịch.
             </small>
           </label>
-          <label className="profile-contact-consent">
-            <input
-              required
-              type="checkbox"
-              name="contactPrivacyAccepted"
-              defaultChecked={user.contactPrivacyAccepted}
-            />
+          <div className="profile-contact-notice">
+            <ShieldCheck size={18} />
             <span>
               <strong>Cam kết bảo vệ thông tin từ nền tảng</strong>
               <small>
                 TWS Community Market cam kết bảo vệ số điện thoại và URL
                 Facebook, chỉ cung cấp trong luồng liên hệ giao dịch hoặc khi
                 admin hỗ trợ an toàn; không bán cho nhà quảng cáo hay chia sẻ
-                ngoài mục đích vận hành và yêu cầu pháp luật hợp lệ. Tôi xác
-                nhận đã đọc cam kết này.
+                ngoài mục đích vận hành và yêu cầu pháp luật hợp lệ.
               </small>
             </span>
-          </label>
+          </div>
           {error && (
             <p className="profile-setup-error" role="alert">
               {error}
             </p>
           )}
-          <div className="profile-privacy-note">
-            <ShieldCheck size={18} />
-            <span>
-              <strong>Chỉ dùng cho mục đích giao dịch</strong>
-              <small>
-                Thông tin liên hệ chỉ được hiển thị cho thành viên đã đăng nhập
-                trong luồng liên hệ mua bán và admin khi cần hỗ trợ an toàn.
-              </small>
-            </span>
-          </div>
           <button
             className="button button-primary profile-setup-submit"
             disabled={saving}

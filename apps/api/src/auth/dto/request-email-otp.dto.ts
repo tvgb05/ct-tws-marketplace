@@ -1,5 +1,5 @@
 import { Transform } from "class-transformer";
-import { Equals, IsBoolean, IsEmail, MaxLength } from "class-validator";
+import { IsBoolean, IsEmail, IsOptional, MaxLength } from "class-validator";
 
 export class RequestEmailOtpDto {
   @Transform(({ value }) =>
@@ -11,9 +11,8 @@ export class RequestEmailOtpDto {
   @MaxLength(254)
   email: string;
 
+  // Backward compatible with older deployed web clients; no consent is required.
+  @IsOptional()
   @IsBoolean()
-  @Equals(true, {
-    message: "Bạn cần xác nhận đã đọc cam kết bảo vệ thông tin liên hệ",
-  })
-  contactPrivacyAccepted: boolean;
+  contactPrivacyAccepted?: boolean;
 }

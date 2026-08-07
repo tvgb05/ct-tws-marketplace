@@ -123,8 +123,8 @@ không nên bật trên production.
 Google chỉ được dùng khi trả về email đã xác minh và cũng là cách đăng nhập chung
 cho cả thành viên lẫn admin. Email OTP là luồng thành viên, hết hạn sau 10
 phút, tối đa 5 lần nhập sai, chỉ dùng một lần và được lưu dưới dạng bản băm.
-Người dùng xác nhận đã đọc cam kết bảo vệ số điện thoại và URL Facebook của nền
-tảng; thời điểm và phiên bản xác nhận được lưu cùng tài khoản. Nghĩa vụ sử dụng
+Nền tảng hiển thị thông tin cam kết bảo vệ số điện thoại và URL Facebook ngay
+trong luồng đăng nhập và cập nhật hồ sơ, không yêu cầu checkbox xác nhận. Nghĩa vụ sử dụng
 thông tin liên hệ của thành viên khác được quy định trong Điều khoản sử dụng.
 Facebook OAuth cũ vẫn còn ở backend để không làm mất liên kết của tài khoản đã
 tồn tại, nhưng không còn là lựa chọn đăng nhập chính.
@@ -138,6 +138,7 @@ tồn tại, nhưng không còn là lựa chọn đăng nhập chính.
 - Thành viên có thể tố cáo tài khoản khác; phiếu tố cáo được lưu riêng và hiển thị trong dashboard admin. Khi xác nhận vi phạm, admin có thể khóa riêng quyền đăng bài mà không khóa đăng nhập, ghi lý do xử lý và cấp lại quyền sau đó. Mỗi thay đổi đều tạo thông báo chưa đọc cho thành viên và audit log cho admin.
 - Forum nằm trong trang quy tắc/FAQ. Admin có thể đăng hướng dẫn hoặc cảnh báo mới; mỗi bài tạo thông báo chưa đọc cho toàn bộ thành viên đang hoạt động và vẫn được lưu để xem lại trên Forum. Danh sách hỗ trợ tìm kiếm nội dung/admin, sắp xếp mới nhất hoặc cũ nhất và phân trang phía server.
 - Dashboard quản trị có danh sách thành viên đăng nhập trong 30 ngày, tài khoản bị khóa quyền đăng và hai hàng đợi báo cáo. Các danh sách dùng truy vấn phía server, hỗ trợ tìm kiếm, lọc trạng thái và phân trang.
+- Yêu cầu trung gian đi vào một hàng đợi chung mà mọi admin đều thấy. Thao tác nhận phụ trách là nguyên tử nên chỉ một admin có thể nhận; sau đó chỉ admin đó được xác nhận hoàn tất. Người mua và người bán nhận thông báo có tên và liên kết hồ sơ admin phụ trách.
 - Prisma domain model cho user, auth identity, listing, image, favorite, report, mediation, notification và audit log.
 - API public listing/category và các endpoint có xác thực cho tạo bài, xem liên hệ, report, trung gian.
 - Chế độ đăng nhiều món dùng chung một bộ ảnh: hệ thống tạo listing, giá và trạng thái giao dịch độc lập cho từng món. Ảnh được lưu cục bộ khi phát triển hoặc tự động chuyển sang Cloudinary khi cấu hình đủ ba biến `CLOUDINARY_*`.

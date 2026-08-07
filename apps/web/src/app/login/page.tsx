@@ -34,7 +34,6 @@ export default function LoginPage() {
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
-  const [contactPrivacyAccepted, setContactPrivacyAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -84,7 +83,7 @@ export default function LoginPage() {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, contactPrivacyAccepted }),
+        body: JSON.stringify({ email }),
       });
       const body = (await response.json().catch(() => null)) as {
         devCode?: string;
@@ -244,15 +243,8 @@ export default function LoginPage() {
                           />
                         </span>
                       </label>
-                      <label className="auth-contact-consent">
-                        <input
-                          type="checkbox"
-                          checked={contactPrivacyAccepted}
-                          onChange={(event) =>
-                            setContactPrivacyAccepted(event.target.checked)
-                          }
-                          required
-                        />
+                      <div className="auth-contact-notice">
+                        <ShieldCheck size={17} />
                         <span>
                           <strong>Cam kết bảo vệ thông tin từ nền tảng</strong>
                           <small>
@@ -260,10 +252,10 @@ export default function LoginPage() {
                             URL Facebook, chỉ cung cấp trong luồng liên hệ giao
                             dịch hoặc hỗ trợ an toàn; không bán cho nhà quảng
                             cáo hay chia sẻ ngoài mục đích vận hành và yêu cầu
-                            pháp luật hợp lệ. Tôi xác nhận đã đọc cam kết này.
+                            pháp luật hợp lệ.
                           </small>
                         </span>
-                      </label>
+                      </div>
                     </>
                   ) : (
                     <>

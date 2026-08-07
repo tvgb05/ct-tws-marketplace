@@ -1412,6 +1412,30 @@ html[data-theme="dark"] .theme-toggle .theme-icon-sun {
   opacity: 0.55;
   cursor: not-allowed;
 }
+.assigned-admin-link {
+  margin-top: 10px;
+  padding: 11px 12px;
+  border: 1px solid #cbd8d1;
+  background: #eef4ef;
+  color: var(--pine);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.assigned-admin-link > span:nth-child(2) {
+  flex: 1;
+  display: grid;
+  gap: 2px;
+}
+.assigned-admin-link small {
+  color: var(--ink-soft);
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.assigned-admin-link strong {
+  font-size: 10px;
+}
 .action-main {
   height: 48px;
 }
@@ -1739,27 +1763,24 @@ html[data-theme="dark"] .theme-toggle .theme-icon-sun {
   font-size: 9px;
   font-weight: 700;
 }
-.email-otp-form fieldset > .auth-contact-consent {
+.email-otp-form fieldset > .auth-contact-notice {
   padding: 10px;
   border: 1px solid #d8dfdb;
   background: #f5f7f3;
   display: flex;
   align-items: flex-start;
   gap: 9px;
-  cursor: pointer;
+  color: var(--pine);
 }
-.auth-contact-consent > input {
-  width: 15px;
-  height: 15px;
+.auth-contact-notice > svg {
   margin: 1px 0 0;
   flex: 0 0 auto;
-  accent-color: var(--pine);
 }
-.auth-contact-consent > span {
+.auth-contact-notice > span {
   display: grid;
   gap: 4px;
 }
-.auth-contact-consent small {
+.auth-contact-notice small {
   color: #67766f;
   font-size: 8px;
   font-weight: 500;
@@ -2144,52 +2165,29 @@ html[data-theme="dark"] .theme-toggle .theme-icon-sun {
   color: #7c8999;
   font-size: 8px;
 }
-.profile-setup-form > .profile-contact-consent {
+.profile-setup-form > .profile-contact-notice {
   padding: 13px;
   border: 1px solid #cdd9d2;
   background: #f5f8f5;
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  cursor: pointer;
+  color: var(--pine);
 }
-.profile-setup-form > .profile-contact-consent > input {
-  width: 17px;
-  height: 17px;
+.profile-setup-form > .profile-contact-notice > svg {
   margin: 1px 0 0;
-  padding: 0;
   flex: 0 0 auto;
-  accent-color: var(--pine);
 }
-.profile-setup-form > .profile-contact-consent > span {
+.profile-setup-form > .profile-contact-notice > span {
   display: grid;
   gap: 5px;
 }
-.profile-contact-consent strong {
+.profile-contact-notice strong {
   color: var(--ink);
   font-size: 10px;
 }
-.profile-contact-consent small {
+.profile-contact-notice small {
   line-height: 1.55;
-}
-.profile-privacy-note {
-  padding: 14px;
-  display: flex;
-  gap: 10px;
-  background: #edf2f7;
-  color: var(--pine);
-}
-.profile-privacy-note > span {
-  display: grid;
-  gap: 4px;
-}
-.profile-privacy-note strong {
-  font-size: 10px;
-}
-.profile-privacy-note small {
-  color: #6f7d90;
-  font-size: 8px;
-  line-height: 1.5;
 }
 .profile-setup-error {
   margin: -5px 0 0;
@@ -2973,6 +2971,17 @@ html[data-theme="dark"] .theme-toggle .theme-icon-sun {
   font-size: 8px;
   font-style: normal;
 }
+.trade-assigned-admin {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--ink-soft);
+  font-size: 8px;
+}
+.trade-assigned-admin a {
+  color: var(--pine);
+  font-weight: 700;
+}
 .trade-actions {
   display: flex;
   gap: 7px;
@@ -3503,6 +3512,42 @@ html[data-theme="dark"] .theme-toggle .theme-icon-sun {
   margin-top: 5px;
   color: var(--ink-soft);
   line-height: 1.5;
+}
+.admin-mediation-queue {
+  margin-bottom: 28px;
+  scroll-margin-top: 90px;
+}
+.admin-mediation-queue > div:first-child > div {
+  display: grid;
+  gap: 5px;
+}
+.admin-mediation-queue > div:first-child p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 9px;
+  line-height: 1.5;
+}
+.admin-table .mediation-assign-button {
+  min-height: 34px;
+  padding: 0 11px;
+  border: 1px solid var(--pine);
+  background: var(--pine);
+  color: white;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.admin-table .mediation-assign-button:disabled {
+  opacity: 0.55;
+}
+.admin-mediation-error {
+  margin: 0;
+  padding: 10px 16px;
+  border-bottom: 1px solid #e6c8c3;
+  background: #f9ebe8;
+  color: #934b39;
+  font-size: 9px;
 }
 .admin-table-controls {
   padding: 13px 16px;
@@ -5189,8 +5234,8 @@ html[data-theme="dark"] .auth-page {
 }
 html[data-theme="dark"] .google-login-button,
 html[data-theme="dark"] .email-otp-input,
-html[data-theme="dark"] .auth-contact-consent,
-html[data-theme="dark"] .profile-setup-form > .profile-contact-consent {
+html[data-theme="dark"] .auth-contact-notice,
+html[data-theme="dark"] .profile-setup-form > .profile-contact-notice {
   background: #162337;
   border-color: #35445a;
   color: #d8e0eb;
@@ -5203,8 +5248,8 @@ html[data-theme="dark"] .email-otp-form fieldset > label,
 html[data-theme="dark"] .email-otp-input input {
   color: #d8e0eb;
 }
-html[data-theme="dark"] .auth-contact-consent small,
-html[data-theme="dark"] .profile-contact-consent small {
+html[data-theme="dark"] .auth-contact-notice small,
+html[data-theme="dark"] .profile-contact-notice small {
   color: #aebaca;
 }
 html[data-theme="dark"] .auth-method-unavailable {
@@ -5221,7 +5266,6 @@ html[data-theme="dark"] .email-otp-message.error {
 }
 html[data-theme="dark"] .remember-login,
 html[data-theme="dark"] .auth-security,
-html[data-theme="dark"] .profile-privacy-note,
 html[data-theme="dark"] .modal-icon,
 html[data-theme="dark"] .mediation-icon,
 html[data-theme="dark"] .admin-password-icon,
@@ -5770,6 +5814,11 @@ html[data-theme="dark"] .guide-step-icon {
 
 html[data-theme="dark"] .buyer-flow .guide-step-icon {
   background: #1d3048;
+}
+html[data-theme="dark"] .assigned-admin-link {
+  background: #1d3048;
+  border-color: #40536c;
+  color: #dce8df;
 }
 
 html[data-theme="dark"] .forum-post-list article,

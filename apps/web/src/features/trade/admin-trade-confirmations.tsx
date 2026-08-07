@@ -13,7 +13,10 @@ type Trade = {
   status: string;
   requestedQuantity: number;
   allocatedQuantity: number;
-  mediationRequest: { id: string } | null;
+  mediationRequest: {
+    id: string;
+    assignedAdminId: string | null;
+  } | null;
   buyer: { id: string; displayName: string; role: "USER" | "ADMIN" };
   seller: { id: string; displayName: string; role: "USER" | "ADMIN" };
   listing: {
@@ -100,7 +103,8 @@ export function AdminTradeConfirmations() {
                 <b>{trade.seller.displayName}</b>
               </Link>
               <AdminBadge role={trade.seller.role} />
-              {" · "}{trade.allocatedQuantity} sản phẩm
+              {" · "}
+              {trade.allocatedQuantity} sản phẩm
             </p>
             <button
               onClick={() => void confirm(trade.id)}

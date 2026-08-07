@@ -13,7 +13,8 @@ import { AdminBadge } from "@/components/admin-badge";
 import { ListingCodeBadges } from "@/components/listing-code-badges";
 import { useAuth } from "@/lib/auth";
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
+const apiUrl =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
 
 type Inventory = {
   totalQuantity: number;
@@ -28,7 +29,16 @@ type Trade = {
   queuePosition: number | null;
   requestedQuantity: number;
   allocatedQuantity: number;
-  mediationRequest: { id: string; status: string } | null;
+  mediationRequest: {
+    id: string;
+    status: string;
+    assignedAdminId: string | null;
+    admin: {
+      id: string;
+      displayName: string;
+      role: "USER" | "ADMIN";
+    } | null;
+  } | null;
   buyer: {
     id: string;
     displayName: string;
@@ -179,10 +189,22 @@ export function SellerTradeManager({
                 <b>{queued.length} đơn chờ</b>
               </header>
               <div className="trade-inventory-stats">
-                <span><small>Tổng</small><strong>{listing.totalQuantity}</strong></span>
-                <span><small>Đang giao dịch</small><strong>{listing.reservedQuantity}</strong></span>
-                <span><small>Đã bán</small><strong>{listing.soldQuantity}</strong></span>
-                <span><small>Còn trống</small><strong>{available}</strong></span>
+                <span>
+                  <small>Tổng</small>
+                  <strong>{listing.totalQuantity}</strong>
+                </span>
+                <span>
+                  <small>Đang giao dịch</small>
+                  <strong>{listing.reservedQuantity}</strong>
+                </span>
+                <span>
+                  <small>Đã bán</small>
+                  <strong>{listing.soldQuantity}</strong>
+                </span>
+                <span>
+                  <small>Còn trống</small>
+                  <strong>{available}</strong>
+                </span>
               </div>
               {active.map((trade) => (
                 <div className="active-buyer" key={trade.id}>
@@ -198,12 +220,24 @@ export function SellerTradeManager({
                       <AdminBadge role={trade.buyer.role} />
                     </span>
                     <em>
-                      <PackageCheck size={13} /> {trade.allocatedQuantity} sản phẩm
+                      <PackageCheck size={13} /> {trade.allocatedQuantity} sản
+                      phẩm
                       {trade.allocatedQuantity < trade.requestedQuantity
                         ? ` · yêu cầu ban đầu ${trade.requestedQuantity}`
                         : ""}
                       {trade.mediationRequest ? " · Trung gian qua admin" : ""}
                     </em>
+                    {trade.mediationRequest?.admin && (
+                      <span className="trade-assigned-admin">
+                        Phụ trách:{" "}
+                        <Link
+                          href={`/users/${trade.mediationRequest.admin.id}`}
+                        >
+                          {trade.mediationRequest.admin.displayName}
+                        </Link>
+                        <AdminBadge role={trade.mediationRequest.admin.role} />
+                      </span>
+                    )}
                   </div>
                   <div className="trade-actions">
                     <button
@@ -219,7 +253,8 @@ export function SellerTradeManager({
                         updating === trade.id || Boolean(trade.mediationRequest)
                       }
                     >
-                      <CheckCircle2 size={14} /> Đã bán {trade.allocatedQuantity}
+                      <CheckCircle2 size={14} /> Đã bán{" "}
+                      {trade.allocatedQuantity}
                     </button>
                   </div>
                 </div>

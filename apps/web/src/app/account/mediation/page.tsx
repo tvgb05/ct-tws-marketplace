@@ -19,7 +19,7 @@ type MediationRequest = {
   admin: { id: string; displayName: string; role: "USER" | "ADMIN" } | null;
 };
 const statusLabel: Record<string, string> = {
-  REQUESTED: "Chờ người bán",
+  REQUESTED: "Chờ admin duyệt",
   SELLER_ACCEPTED: "Chờ admin",
   SELLER_REJECTED: "Người bán từ chối",
   ADMIN_ASSIGNED: "Đã có admin",
