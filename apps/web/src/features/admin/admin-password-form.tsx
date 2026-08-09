@@ -70,7 +70,7 @@ export function AdminPasswordForm() {
           <input
             type="password"
             autoComplete="current-password"
-            minLength={8}
+            minLength={6}
             maxLength={128}
             value={currentPassword}
             onChange={(event) => setCurrentPassword(event.target.value)}
@@ -82,8 +82,9 @@ export function AdminPasswordForm() {
           <input
             type="password"
             autoComplete="new-password"
-            minLength={12}
+            minLength={6}
             maxLength={128}
+            pattern="(?=.*[A-Za-z])(?=.*[0-9]).{6,128}"
             value={newPassword}
             onChange={(event) => setNewPassword(event.target.value)}
             required
@@ -94,15 +95,17 @@ export function AdminPasswordForm() {
           <input
             type="password"
             autoComplete="new-password"
-            minLength={12}
+            minLength={6}
             maxLength={128}
+            pattern="(?=.*[A-Za-z])(?=.*[0-9]).{6,128}"
             value={confirmation}
             onChange={(event) => setConfirmation(event.target.value)}
             required
           />
         </label>
         <small className="admin-password-requirement">
-          Mật khẩu mới cần ít nhất 12 ký tự, có chữ hoa, chữ thường và chữ số.
+          Mật khẩu mới cần ít nhất 6 ký tự, có ít nhất một chữ cái và một chữ
+          số.
         </small>
         {error && <p className="admin-form-message error">{error}</p>}
         {success && (

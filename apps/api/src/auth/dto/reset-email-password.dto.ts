@@ -16,9 +16,10 @@ export class ResetEmailPasswordDto {
   code: string;
 
   @IsString()
-  @Length(12, 128)
-  @Matches(/[a-z]/, { message: "Mật khẩu mới cần có chữ thường" })
-  @Matches(/[A-Z]/, { message: "Mật khẩu mới cần có chữ hoa" })
+  @Length(6, 128)
+  @Matches(/[A-Za-z]/, {
+    message: "Mật khẩu mới cần có ít nhất một chữ cái",
+  })
   @Matches(/[0-9]/, { message: "Mật khẩu mới cần có chữ số" })
   password: string;
 }

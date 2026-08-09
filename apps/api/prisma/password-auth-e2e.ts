@@ -16,8 +16,8 @@ async function main() {
   await prisma.$connect();
   const suffix = randomUUID();
   const email = `password-auth-${suffix}@example.com`;
-  const firstPassword = "InitialPassword123";
-  const nextPassword = "UpdatedPassword456";
+  const firstPassword = "abc123";
+  const nextPassword = "xyz789";
   let userId: string | undefined;
 
   try {

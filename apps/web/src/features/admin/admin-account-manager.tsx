@@ -176,11 +176,14 @@ export function AdminAccountManager() {
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               autoComplete="new-password"
-              minLength={12}
+              minLength={6}
               maxLength={128}
+              pattern="(?=.*[A-Za-z])(?=.*[0-9]).{6,128}"
               required
             />
-            <small>Ít nhất 12 ký tự, có chữ hoa, chữ thường và chữ số.</small>
+            <small>
+              Ít nhất 6 ký tự, có ít nhất một chữ cái và một chữ số.
+            </small>
           </label>
           {error && <p className="admin-form-message error">{error}</p>}
           {message && (

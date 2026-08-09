@@ -14,13 +14,12 @@ async function main() {
     throw new Error("Email admin không hợp lệ.");
   if (
     !password ||
-    password.length < 12 ||
-    !/[a-z]/.test(password) ||
-    !/[A-Z]/.test(password) ||
+    password.length < 6 ||
+    !/[A-Za-z]/.test(password) ||
     !/[0-9]/.test(password)
   )
     throw new Error(
-      "Mật khẩu cần ít nhất 12 ký tự, gồm chữ hoa, chữ thường và chữ số.",
+      "Mật khẩu cần ít nhất 6 ký tự, gồm ít nhất một chữ cái và một chữ số.",
     );
 
   const existing = await prisma.adminCredential.findUnique({

@@ -334,15 +334,18 @@ export function AuthEntryPage({ intent }: { intent: AuthIntent }) {
                           value={password}
                           onChange={setPassword}
                           autoComplete="new-password"
+                          requireLettersAndNumbers
                         />
                         <PasswordInput
                           label="Xác nhận mật khẩu"
                           value={confirmPassword}
                           onChange={setConfirmPassword}
                           autoComplete="new-password"
+                          requireLettersAndNumbers
                         />
                         <small className="auth-password-requirement">
-                          Ít nhất 12 ký tự, gồm chữ hoa, chữ thường và chữ số.
+                          Ít nhất 6 ký tự, gồm ít nhất một chữ cái và một chữ
+                          số.
                         </small>
                       </>
                     ) : (
@@ -401,7 +404,7 @@ export function AuthEntryPage({ intent }: { intent: AuthIntent }) {
                       value={password}
                       onChange={setPassword}
                       autoComplete="current-password"
-                      minLength={8}
+                      minLength={6}
                     />
                     <Link
                       className="auth-forgot-password"
@@ -486,13 +489,15 @@ function PasswordInput({
   value,
   onChange,
   autoComplete,
-  minLength = 12,
+  minLength = 6,
+  requireLettersAndNumbers = false,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   autoComplete: "current-password" | "new-password";
   minLength?: number;
+  requireLettersAndNumbers?: boolean;
 }) {
   return (
     <AuthInput
@@ -504,6 +509,11 @@ function PasswordInput({
       autoComplete={autoComplete}
       minLength={minLength}
       maxLength={128}
+      pattern={
+        requireLettersAndNumbers
+          ? "(?=.*[A-Za-z])(?=.*[0-9]).{6,128}"
+          : undefined
+      }
       placeholder="••••••••••••"
     />
   );
@@ -524,7 +534,7 @@ function AuthInput({
   type?: "text" | "email" | "password";
 } & Pick<
   React.InputHTMLAttributes<HTMLInputElement>,
-  "autoComplete" | "minLength" | "maxLength" | "placeholder"
+  "autoComplete" | "minLength" | "maxLength" | "pattern" | "placeholder"
 >) {
   return (
     <label>

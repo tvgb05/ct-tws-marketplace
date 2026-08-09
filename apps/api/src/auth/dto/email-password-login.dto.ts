@@ -17,7 +17,7 @@ export class EmailPasswordLoginDto {
   email: string;
 
   @IsString()
-  @Length(8, 128)
+  @Length(6, 128)
   password: string;
 
   @IsOptional()

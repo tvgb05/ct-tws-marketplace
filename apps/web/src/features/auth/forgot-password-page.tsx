@@ -213,7 +213,7 @@ export function ForgotPasswordPage() {
                       onChange={setConfirmPassword}
                     />
                     <small className="auth-password-requirement">
-                      Ít nhất 12 ký tự, gồm chữ hoa, chữ thường và chữ số.
+                      Ít nhất 6 ký tự, gồm ít nhất một chữ cái và một chữ số.
                     </small>
                   </>
                 ) : (
@@ -310,8 +310,9 @@ function PasswordField({
           value={value}
           onChange={(event) => onChange(event.target.value)}
           autoComplete="new-password"
-          minLength={12}
+          minLength={6}
           maxLength={128}
+          pattern="(?=.*[A-Za-z])(?=.*[0-9]).{6,128}"
           placeholder="••••••••••••"
           required
         />
