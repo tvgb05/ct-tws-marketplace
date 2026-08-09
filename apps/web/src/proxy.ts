@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { hasValidSession } from "./lib/server-session";
 
-const publicPaths = new Set(["/login", "/admin/login", "/privacy", "/terms"]);
+const publicPaths = new Set([
+  "/login",
+  "/register",
+  "/admin/login",
+  "/privacy",
+  "/terms",
+]);
 
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;

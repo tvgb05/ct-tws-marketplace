@@ -10,6 +10,7 @@ import { randomInt } from "node:crypto";
 import nodemailer from "nodemailer";
 import { Resend } from "resend";
 import { PrismaService } from "../prisma/prisma.service";
+import type { AuthIntent } from "./auth-intent";
 
 const OTP_TTL_MS = 10 * 60 * 1000;
 const MAX_ATTEMPTS = 5;
@@ -33,7 +34,7 @@ export class EmailOtpService {
     return Boolean(host && from && Boolean(user) === Boolean(password));
   }
 
-  async requestCode(email: string) {
+  async requestCode(email: string, intent: AuthIntent) {
     if (!this.isAvailable())
       throw new ServiceUnavailableException(
         "Dịch vụ gửi email chưa được cấu hình.",
@@ -52,6 +53,7 @@ export class EmailOtpService {
         email: normalizedEmail,
         codeHash,
         expiresAt,
+        intent,
         contactPrivacyAcceptedAt: new Date(),
       },
     });
@@ -122,6 +124,10 @@ export class EmailOtpService {
       throw new UnauthorizedException("Mã OTP không hợp lệ hoặc đã hết hạn");
     return {
       email: normalizedEmail,
+      intent:
+        record.intent === "register"
+          ? ("register" as const)
+          : ("login" as const),
       contactPrivacyAcceptedAt: record.contactPrivacyAcceptedAt,
     };
   }

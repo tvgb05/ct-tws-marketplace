@@ -35,7 +35,13 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | null>(null);
 const apiUrl =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
-const publicPaths = new Set(["/login", "/admin/login", "/privacy", "/terms"]);
+const publicPaths = new Set([
+  "/login",
+  "/register",
+  "/admin/login",
+  "/privacy",
+  "/terms",
+]);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);

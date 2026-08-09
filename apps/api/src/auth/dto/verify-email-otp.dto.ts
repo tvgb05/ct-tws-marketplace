@@ -2,6 +2,7 @@ import { Transform } from "class-transformer";
 import {
   IsBoolean,
   IsEmail,
+  IsOptional,
   IsString,
   Matches,
   MaxLength,
@@ -9,7 +10,11 @@ import {
 } from "class-validator";
 
 export class VerifyEmailOtpDto {
-  @Transform(({ value }) => String(value ?? "").trim().toLowerCase())
+  @Transform(({ value }) =>
+    String(value ?? "")
+      .trim()
+      .toLowerCase(),
+  )
   @IsEmail()
   @MaxLength(254)
   email: string;
@@ -20,10 +25,11 @@ export class VerifyEmailOtpDto {
   code: string;
 
   @Transform(({ value }) => String(value ?? "").trim())
+  @IsOptional()
   @IsString()
   @MinLength(2)
   @MaxLength(60)
-  displayName: string;
+  displayName?: string;
 
   @IsBoolean()
   remember: boolean;

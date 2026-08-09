@@ -15,6 +15,7 @@ import { AdminLoginDto } from "./dto/admin-login.dto";
 import { ChangeAdminPasswordDto } from "./dto/change-admin-password.dto";
 import { CompleteProfileDto } from "./dto/complete-profile.dto";
 import { CONTACT_PRIVACY_POLICY_VERSION } from "./contact-privacy";
+import type { AuthIntent } from "./auth-intent";
 
 export interface FacebookProfile {
   providerUserId: string;
@@ -60,7 +61,11 @@ export class AuthService {
     );
   }
 
-  async loginWithGoogle(profile: GoogleProfile, rememberForThirtyDays = false) {
+  async loginWithGoogle(
+    profile: GoogleProfile,
+    rememberForThirtyDays = false,
+    intent: AuthIntent = "login",
+  ) {
     const adminCredential = await this.prisma.adminCredential.findFirst({
       where: {
         email: { equals: profile.email, mode: "insensitive" },
@@ -114,25 +119,30 @@ export class AuthService {
       AuthProvider.GOOGLE,
       profile,
       rememberForThirtyDays,
+      undefined,
+      undefined,
+      intent,
     );
   }
 
   loginWithEmail(
     email: string,
-    displayName: string,
+    displayName: string | undefined,
     contactPrivacyAcceptedAt: Date,
+    intent: AuthIntent,
     rememberForThirtyDays = false,
   ) {
     return this.loginWithIdentity(
       AuthProvider.EMAIL,
       {
         providerUserId: email,
-        displayName: displayName.trim(),
+        displayName: displayName?.trim() || "Thành viên TWS",
         email,
       },
       rememberForThirtyDays,
       undefined,
       contactPrivacyAcceptedAt,
+      intent,
     );
   }
 
@@ -142,6 +152,7 @@ export class AuthService {
     rememberForThirtyDays: boolean,
     facebookProfileUrl?: string,
     contactPrivacyAcceptedAt?: Date,
+    intent?: AuthIntent,
   ) {
     const identity = await this.prisma.authIdentity.findUnique({
       where: {
@@ -179,6 +190,17 @@ export class AuthService {
     const existingAccount = identity?.user ?? existingByEmail;
     if (existingAccount && existingAccount.status !== "ACTIVE")
       throw new UnauthorizedException("Tài khoản đã bị hạn chế");
+
+    if (intent === "login" && !existingAccount)
+      throw new NotFoundException(
+        "Email này chưa có tài khoản. Vui lòng chuyển sang Tạo tài khoản.",
+      );
+    if (intent === "register" && existingAccount)
+      throw new ConflictException(
+        "Email này đã có tài khoản. Vui lòng chuyển sang Đăng nhập.",
+      );
+    if (intent === "register" && !profile.displayName.trim())
+      throw new BadRequestException("Vui lòng nhập tên hiển thị");
 
     const profileUpdates = {
       ...(provider !== AuthProvider.EMAIL

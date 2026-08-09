@@ -8,6 +8,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   if (
     pathname === "/login" ||
+    pathname === "/register" ||
     pathname === "/admin/login" ||
     pathname === "/complete-profile"
   )

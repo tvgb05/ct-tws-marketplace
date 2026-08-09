@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpException,
   Patch,
   Post,
   Req,
@@ -26,6 +27,7 @@ import { RequestEmailOtpDto } from "./dto/request-email-otp.dto";
 import { VerifyEmailOtpDto } from "./dto/verify-email-otp.dto";
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import { GoogleOAuthGuard } from "./google-oauth.guard";
+import { authIntentFrom, type AuthIntent } from "./auth-intent";
 
 @ApiTags("auth")
 @Controller("auth")
@@ -71,12 +73,17 @@ export class AuthController {
   @Get("google/start")
   googleStart(@Req() request: Request, @Res() response: Response) {
     const rememberForThirtyDays = request.query.remember === "1";
+    const intent = authIntentFrom(request.query.intent);
     const state = randomBytes(32).toString("hex");
     response.cookie("tws_login_remember", rememberForThirtyDays ? "1" : "0", {
       ...this.cookieOptions(),
       maxAge: 10 * 60 * 1000,
     });
     response.cookie("tws_google_oauth_state", state, {
+      ...this.cookieOptions(),
+      maxAge: 10 * 60 * 1000,
+    });
+    response.cookie("tws_auth_intent", intent, {
       ...this.cookieOptions(),
       maxAge: 10 * 60 * 1000,
     });
@@ -107,18 +114,26 @@ export class AuthController {
       throw new UnauthorizedException("Phiên đăng nhập Google không hợp lệ");
     }
     const rememberForThirtyDays = request.cookies?.tws_login_remember === "1";
-    const result = await this.auth.loginWithGoogle(
-      request.user,
-      rememberForThirtyDays,
-    );
-    this.setSessionCookie(response, result.token, rememberForThirtyDays);
-    return response.redirect(this.loginDestination(result.user));
+    const intent = authIntentFrom(request.cookies?.tws_auth_intent);
+    response.clearCookie("tws_login_remember", this.cookieOptions());
+    response.clearCookie("tws_auth_intent", this.cookieOptions());
+    try {
+      const result = await this.auth.loginWithGoogle(
+        request.user,
+        rememberForThirtyDays,
+        intent,
+      );
+      this.setSessionCookie(response, result.token, rememberForThirtyDays);
+      return response.redirect(this.loginDestination(result.user));
+    } catch (error) {
+      return response.redirect(this.authFailureDestination(intent, error));
+    }
   }
 
   @Post("email/request-code")
   @Throttle({ default: { limit: 3, ttl: 10 * 60_000 } })
   requestEmailCode(@Body() input: RequestEmailOtpDto) {
-    return this.emailOtp.requestCode(input.email);
+    return this.emailOtp.requestCode(input.email, input.intent);
   }
 
   @Post("email/verify-code")
@@ -132,6 +147,7 @@ export class AuthController {
       verified.email,
       input.displayName,
       verified.contactPrivacyAcceptedAt,
+      verified.intent,
       input.remember,
     );
     this.setSessionCookie(response, result.token, input.remember);
@@ -255,6 +271,7 @@ export class AuthController {
     response.clearCookie("tws_session", this.cookieOptions());
     response.clearCookie("tws_login_remember", this.cookieOptions());
     response.clearCookie("tws_google_oauth_state", this.cookieOptions());
+    response.clearCookie("tws_auth_intent", this.cookieOptions());
     return { success: true };
   }
 
@@ -297,5 +314,15 @@ export class AuthController {
       ? "/marketplace?login=success"
       : "/complete-profile";
     return `${this.config.get("WEB_URL", "http://localhost:3000")}${destination}`;
+  }
+
+  private authFailureDestination(intent: AuthIntent, error: unknown) {
+    const message =
+      error instanceof HttpException && error.getStatus() < 500
+        ? error.message
+        : "Không thể xác thực bằng Google. Vui lòng thử lại.";
+    const page = intent === "register" ? "/register" : "/login";
+    const webUrl = this.config.get("WEB_URL", "http://localhost:3000");
+    return `${webUrl}${page}?authError=${encodeURIComponent(message)}`;
   }
 }

@@ -80,6 +80,7 @@ model AuthIdentity {
 model EmailLoginCode {
   id         String    @id @default(cuid())
   email      String
+  intent     String    @default("login")
   codeHash   String
   attempts   Int       @default(0)
   expiresAt  DateTime

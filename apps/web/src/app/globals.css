@@ -1670,6 +1670,34 @@ html[data-theme="dark"] .theme-toggle .theme-icon-sun {
   width: min(440px, 100%);
   margin: auto;
 }
+.auth-mode-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 24px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--paper) 72%, transparent);
+}
+.auth-mode-tabs a {
+  min-height: 40px;
+  border-radius: 4px;
+  color: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  transition: 0.2s;
+}
+.auth-mode-tabs a:hover {
+  color: var(--ink);
+}
+.auth-mode-tabs a.active {
+  background: var(--pine);
+  color: white;
+  box-shadow: 0 5px 14px rgba(16, 29, 49, 0.16);
+}
 .auth-kicker {
   color: #9e6d2d;
   font-weight: 700;
@@ -5308,6 +5336,7 @@ html[data-theme="dark"] .auth-page {
 html[data-theme="dark"] .google-login-button,
 html[data-theme="dark"] .email-otp-input,
 html[data-theme="dark"] .auth-contact-notice,
+html[data-theme="dark"] .auth-mode-tabs,
 html[data-theme="dark"] .profile-setup-form > .profile-contact-notice {
   background: #162337;
   border-color: #35445a;

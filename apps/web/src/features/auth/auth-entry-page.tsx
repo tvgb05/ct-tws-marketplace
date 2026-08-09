@@ -1,0 +1,401 @@
+"use client";
+
+import {
+  ArrowLeft,
+  KeyRound,
+  LoaderCircle,
+  Mail,
+  ShieldCheck,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { FormEvent, useEffect, useState } from "react";
+import { useAuth } from "@/lib/auth";
+
+type AuthIntent = "login" | "register";
+
+const apiOrigin =
+  process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/v1$/, "") ??
+  "http://localhost:4000";
+const apiUrl = `${apiOrigin}/api/v1`;
+
+function apiErrorMessage(body: unknown, fallback: string) {
+  if (!body || typeof body !== "object" || !("message" in body))
+    return fallback;
+  const message = (body as { message?: string | string[] }).message;
+  return Array.isArray(message)
+    ? (message[0] ?? fallback)
+    : (message ?? fallback);
+}
+
+function destinationWithNext(path: string, nextPath: string) {
+  return nextPath === "/marketplace"
+    ? path
+    : `${path}?next=${encodeURIComponent(nextPath)}`;
+}
+
+export function AuthEntryPage({ intent }: { intent: AuthIntent }) {
+  const { user, loading } = useAuth();
+  const registering = intent === "register";
+  const [rememberForThirtyDays, setRememberForThirtyDays] = useState(false);
+  const [emailStep, setEmailStep] = useState<"request" | "verify">("request");
+  const [displayName, setDisplayName] = useState("");
+  const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [methods, setMethods] = useState<{
+    google: boolean;
+    emailOtp: boolean;
+  } | null>(null);
+  const router = useRouter();
+  const requestedPath =
+    typeof window === "undefined"
+      ? null
+      : new URLSearchParams(window.location.search).get("next");
+  const nextPath =
+    requestedPath?.startsWith("/") && !requestedPath.startsWith("//")
+      ? requestedPath
+      : "/marketplace";
+
+  useEffect(() => {
+    if (!loading && user) {
+      if (user.role === "ADMIN") router.replace("/admin");
+      else
+        router.replace(
+          user.profileCompleted
+            ? nextPath
+            : `/complete-profile?next=${encodeURIComponent(nextPath)}`,
+        );
+    }
+  }, [loading, user, router, nextPath]);
+
+  useEffect(() => {
+    const authError = new URLSearchParams(window.location.search).get(
+      "authError",
+    );
+    if (authError) {
+      // The message comes from a same-origin OAuth callback.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setError(authError);
+    }
+    void fetch(`${apiUrl}/auth/methods`, { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) throw new Error();
+        setMethods(
+          (await response.json()) as { google: boolean; emailOtp: boolean },
+        );
+      })
+      .catch(() => setMethods({ google: false, emailOtp: false }));
+  }, []);
+
+  async function requestCode(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSubmitting(true);
+    setError("");
+    setMessage("");
+    try {
+      const response = await fetch(`${apiUrl}/auth/email/request-code`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, intent }),
+      });
+      const body = (await response.json().catch(() => null)) as {
+        devCode?: string;
+      } | null;
+      if (!response.ok)
+        throw new Error(
+          apiErrorMessage(body, "Không thể gửi mã. Vui lòng thử lại."),
+        );
+      setEmailStep("verify");
+      setMessage(
+        body?.devCode
+          ? `Môi trường phát triển: mã OTP là ${body.devCode}`
+          : `Đã gửi mã tới ${email.trim().toLowerCase()}. Hãy kiểm tra cả Hộp thư đến và Spam/Thư rác; người gửi hiển thị là taskflow-planner.`,
+      );
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Không thể gửi mã.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function verifyCode(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSubmitting(true);
+    setError("");
+    try {
+      const response = await fetch(`${apiUrl}/auth/email/verify-code`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          code,
+          remember: rememberForThirtyDays,
+          ...(registering ? { displayName } : {}),
+        }),
+      });
+      const body = (await response.json().catch(() => null)) as {
+        profileCompleted?: boolean;
+      } | null;
+      if (!response.ok)
+        throw new Error(
+          apiErrorMessage(body, "Mã OTP không hợp lệ hoặc đã hết hạn."),
+        );
+      window.location.assign(
+        body?.profileCompleted
+          ? nextPath
+          : `/complete-profile?next=${encodeURIComponent(nextPath)}`,
+      );
+    } catch (caught) {
+      setError(
+        caught instanceof Error ? caught.message : "Không thể xác nhận mã OTP.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  const loginHref = destinationWithNext("/login", nextPath);
+  const registerHref = destinationWithNext("/register", nextPath);
+
+  return (
+    <main className="auth-page">
+      <div className="auth-art">
+        <Image
+          src="/brand/earbuds-hero.png"
+          alt="Tai nghe không dây bên bờ biển"
+          fill
+          sizes="50vw"
+          priority
+        />
+        <div className="auth-quote">
+          <span>“</span>
+          <p>
+            Những món đồ tốt xứng đáng có thêm một vòng đời, cùng người thực sự
+            cần chúng.
+          </p>
+          <small>TWS Community Market</small>
+        </div>
+      </div>
+      <div className="auth-form">
+        <div className="auth-box">
+          <nav className="auth-mode-tabs" aria-label="Chọn hình thức xác thực">
+            <Link
+              href={loginHref}
+              className={!registering ? "active" : ""}
+              aria-current={!registering ? "page" : undefined}
+            >
+              Đăng nhập
+            </Link>
+            <Link
+              href={registerHref}
+              className={registering ? "active" : ""}
+              aria-current={registering ? "page" : undefined}
+            >
+              Tạo tài khoản
+            </Link>
+          </nav>
+          <span className="auth-kicker">
+            {registering ? "THÀNH VIÊN MỚI" : "MỪNG BẠN TRỞ LẠI"}
+          </span>
+          <h1>
+            {registering ? "Tham gia cộng đồng" : "Đăng nhập để"}
+            <br />
+            <em>{registering ? "mua bán tử tế." : "tiếp tục giao dịch."}</em>
+          </h1>
+          <p>
+            {registering
+              ? "Tạo tài khoản bằng Google hoặc email. Bạn sẽ hoàn thiện thông tin liên hệ ở bước tiếp theo."
+              : "Dùng Google hoặc email đã đăng ký. Chúng tôi không yêu cầu mật khẩu email của bạn."}
+          </p>
+          {loading ? (
+            <div className="auth-loading">
+              <LoaderCircle className="spin" /> Đang kiểm tra phiên đăng nhập…
+            </div>
+          ) : (
+            <>
+              {methods?.google ? (
+                <a
+                  href={`${apiOrigin}/api/v1/auth/google/start?remember=${rememberForThirtyDays ? "1" : "0"}&intent=${intent}`}
+                  className="google-login-button"
+                >
+                  <span aria-hidden="true">G</span>{" "}
+                  {registering
+                    ? "Đăng ký bằng Google"
+                    : "Đăng nhập bằng Google"}
+                </a>
+              ) : (
+                <div className="google-login-button disabled">
+                  <span aria-hidden="true">G</span>{" "}
+                  {methods
+                    ? "Google chưa được cấu hình"
+                    : "Đang kiểm tra Google…"}
+                </div>
+              )}
+              <div className="auth-divider">
+                <span>hoặc dùng email</span>
+              </div>
+              <form
+                className="email-otp-form"
+                onSubmit={emailStep === "request" ? requestCode : verifyCode}
+              >
+                {!methods?.emailOtp && (
+                  <p className="auth-method-unavailable">
+                    {methods
+                      ? "Email OTP chưa được cấu hình Resend hoặc SMTP."
+                      : "Đang kiểm tra dịch vụ email…"}
+                  </p>
+                )}
+                <fieldset disabled={!methods?.emailOtp || submitting}>
+                  {emailStep === "request" ? (
+                    <>
+                      {registering && (
+                        <label>
+                          <span>Tên hiển thị</span>
+                          <span className="email-otp-input">
+                            <ShieldCheck size={16} />
+                            <input
+                              value={displayName}
+                              onChange={(event) =>
+                                setDisplayName(event.target.value)
+                              }
+                              minLength={2}
+                              maxLength={60}
+                              autoComplete="name"
+                              placeholder="Tên mọi người sẽ thấy"
+                              required
+                            />
+                          </span>
+                        </label>
+                      )}
+                      <label>
+                        <span>Email</span>
+                        <span className="email-otp-input">
+                          <Mail size={16} />
+                          <input
+                            type="email"
+                            value={email}
+                            onChange={(event) => setEmail(event.target.value)}
+                            maxLength={254}
+                            autoComplete="email"
+                            placeholder="ban@example.com"
+                            required
+                          />
+                        </span>
+                      </label>
+                      <div className="auth-contact-notice">
+                        <ShieldCheck size={17} />
+                        <span>
+                          <strong>Cam kết bảo vệ thông tin từ nền tảng</strong>
+                          <small>
+                            TWS Community Market bảo vệ số điện thoại và URL
+                            Facebook, chỉ cung cấp trong luồng liên hệ giao dịch
+                            hoặc hỗ trợ an toàn; không bán cho nhà quảng cáo.
+                          </small>
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        className="email-otp-back"
+                        onClick={() => {
+                          setEmailStep("request");
+                          setCode("");
+                          setError("");
+                          setMessage("");
+                        }}
+                      >
+                        <ArrowLeft size={14} /> Đổi email
+                      </button>
+                      <label>
+                        <span>Mã OTP gửi tới {email.trim().toLowerCase()}</span>
+                        <span className="email-otp-input code">
+                          <KeyRound size={16} />
+                          <input
+                            value={code}
+                            onChange={(event) =>
+                              setCode(
+                                event.target.value
+                                  .replace(/\D/g, "")
+                                  .slice(0, 6),
+                              )
+                            }
+                            inputMode="numeric"
+                            autoComplete="one-time-code"
+                            pattern="[0-9]{6}"
+                            placeholder="000000"
+                            required
+                            autoFocus
+                          />
+                        </span>
+                      </label>
+                    </>
+                  )}
+                  <button className="email-otp-submit" disabled={submitting}>
+                    {submitting ? (
+                      <LoaderCircle className="spin" size={17} />
+                    ) : emailStep === "request" ? (
+                      <Mail size={17} />
+                    ) : (
+                      <KeyRound size={17} />
+                    )}
+                    {emailStep === "request"
+                      ? registering
+                        ? "Gửi mã đăng ký"
+                        : "Gửi mã đăng nhập"
+                      : registering
+                        ? "Xác nhận và tạo tài khoản"
+                        : "Xác nhận đăng nhập"}
+                  </button>
+                </fieldset>
+              </form>
+              {message && (
+                <p className="email-otp-message success">{message}</p>
+              )}
+              {error && (
+                <p className="email-otp-message error" role="alert">
+                  {error}
+                </p>
+              )}
+              <label className="remember-login">
+                <input
+                  type="checkbox"
+                  checked={rememberForThirtyDays}
+                  onChange={(event) =>
+                    setRememberForThirtyDays(event.target.checked)
+                  }
+                />
+                <span>
+                  <strong>Duy trì đăng nhập trong 30 ngày</strong>
+                  <small>Chỉ nên chọn trên thiết bị cá nhân của bạn.</small>
+                </span>
+              </label>
+            </>
+          )}
+          <div className="auth-security">
+            <ShieldCheck size={18} />
+            <span>
+              <strong>Xác thực không dùng mật khẩu</strong>
+              <small>
+                Google phải cung cấp email đã xác minh. OTP từ taskflow-planner
+                chỉ dùng một lần và hết hạn sau 10 phút.
+              </small>
+            </span>
+          </div>
+          <p className="auth-legal">
+            Bằng việc tiếp tục, bạn đồng ý với{" "}
+            <Link href="/terms">Điều khoản</Link> và{" "}
+            <Link href="/privacy">Chính sách quyền riêng tư</Link>.
+          </p>
+        </div>
+      </div>
+    </main>
+  );
+}
