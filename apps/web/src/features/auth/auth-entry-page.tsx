@@ -4,8 +4,10 @@ import {
   ArrowLeft,
   KeyRound,
   LoaderCircle,
+  LockKeyhole,
   Mail,
   ShieldCheck,
+  UserRound,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -39,9 +41,13 @@ export function AuthEntryPage({ intent }: { intent: AuthIntent }) {
   const { user, loading } = useAuth();
   const registering = intent === "register";
   const [rememberForThirtyDays, setRememberForThirtyDays] = useState(false);
-  const [emailStep, setEmailStep] = useState<"request" | "verify">("request");
+  const [registrationStep, setRegistrationStep] = useState<
+    "details" | "verify"
+  >("details");
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [code, setCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
@@ -49,6 +55,7 @@ export function AuthEntryPage({ intent }: { intent: AuthIntent }) {
   const [methods, setMethods] = useState<{
     google: boolean;
     emailOtp: boolean;
+    emailPassword: boolean;
   } | null>(null);
   const router = useRouter();
   const requestedPath =
@@ -85,23 +92,74 @@ export function AuthEntryPage({ intent }: { intent: AuthIntent }) {
       .then(async (response) => {
         if (!response.ok) throw new Error();
         setMethods(
-          (await response.json()) as { google: boolean; emailOtp: boolean },
+          (await response.json()) as {
+            google: boolean;
+            emailOtp: boolean;
+            emailPassword: boolean;
+          },
         );
       })
-      .catch(() => setMethods({ google: false, emailOtp: false }));
+      .catch(() =>
+        setMethods({ google: false, emailOtp: false, emailPassword: false }),
+      );
   }, []);
 
-  async function requestCode(event: FormEvent<HTMLFormElement>) {
+  function assertMatchingPasswords() {
+    if (password !== confirmPassword) {
+      setError("Mật khẩu xác nhận không khớp.");
+      return false;
+    }
+    return true;
+  }
+
+  async function loginWithPassword(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitting(true);
     setError("");
+    try {
+      const response = await fetch(`${apiUrl}/auth/email/login`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          password,
+          remember: rememberForThirtyDays,
+        }),
+      });
+      const body = (await response.json().catch(() => null)) as {
+        profileCompleted?: boolean;
+      } | null;
+      if (!response.ok)
+        throw new Error(
+          apiErrorMessage(body, "Email hoặc mật khẩu không chính xác."),
+        );
+      window.location.assign(
+        body && "profileCompleted" in body && body.profileCompleted === false
+          ? `/complete-profile?next=${encodeURIComponent(nextPath)}`
+          : nextPath,
+      );
+    } catch (caught) {
+      setError(
+        caught instanceof Error ? caught.message : "Không thể đăng nhập.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function requestRegistrationCode(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
     setMessage("");
+    if (!assertMatchingPasswords()) return;
+    setSubmitting(true);
     try {
       const response = await fetch(`${apiUrl}/auth/email/request-code`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, intent }),
+        body: JSON.stringify({ email, intent: "register" }),
       });
       const body = (await response.json().catch(() => null)) as {
         devCode?: string;
@@ -110,7 +168,7 @@ export function AuthEntryPage({ intent }: { intent: AuthIntent }) {
         throw new Error(
           apiErrorMessage(body, "Không thể gửi mã. Vui lòng thử lại."),
         );
-      setEmailStep("verify");
+      setRegistrationStep("verify");
       setMessage(
         body?.devCode
           ? `Môi trường phát triển: mã OTP là ${body.devCode}`
@@ -123,20 +181,21 @@ export function AuthEntryPage({ intent }: { intent: AuthIntent }) {
     }
   }
 
-  async function verifyCode(event: FormEvent<HTMLFormElement>) {
+  async function completeRegistration(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitting(true);
     setError("");
     try {
-      const response = await fetch(`${apiUrl}/auth/email/verify-code`, {
+      const response = await fetch(`${apiUrl}/auth/email/register`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email,
           code,
+          displayName,
+          password,
           remember: rememberForThirtyDays,
-          ...(registering ? { displayName } : {}),
         }),
       });
       const body = (await response.json().catch(() => null)) as {
@@ -147,13 +206,11 @@ export function AuthEntryPage({ intent }: { intent: AuthIntent }) {
           apiErrorMessage(body, "Mã OTP không hợp lệ hoặc đã hết hạn."),
         );
       window.location.assign(
-        body?.profileCompleted
-          ? nextPath
-          : `/complete-profile?next=${encodeURIComponent(nextPath)}`,
+        `/complete-profile?next=${encodeURIComponent(nextPath)}`,
       );
     } catch (caught) {
       setError(
-        caught instanceof Error ? caught.message : "Không thể xác nhận mã OTP.",
+        caught instanceof Error ? caught.message : "Không thể tạo tài khoản.",
       );
     } finally {
       setSubmitting(false);
@@ -162,6 +219,7 @@ export function AuthEntryPage({ intent }: { intent: AuthIntent }) {
 
   const loginHref = destinationWithNext("/login", nextPath);
   const registerHref = destinationWithNext("/register", nextPath);
+  const forgotPasswordHref = destinationWithNext("/forgot-password", nextPath);
 
   return (
     <main className="auth-page">
@@ -210,8 +268,8 @@ export function AuthEntryPage({ intent }: { intent: AuthIntent }) {
           </h1>
           <p>
             {registering
-              ? "Tạo tài khoản bằng Google hoặc email. Bạn sẽ hoàn thiện thông tin liên hệ ở bước tiếp theo."
-              : "Dùng Google hoặc email đã đăng ký. Chúng tôi không yêu cầu mật khẩu email của bạn."}
+              ? "Tạo tài khoản bằng Google hoặc email, sau đó xác minh email bằng mã OTP."
+              : "Đăng nhập bằng Google hoặc email và mật khẩu đã đăng ký."}
           </p>
           {loading ? (
             <div className="auth-loading">
@@ -240,111 +298,124 @@ export function AuthEntryPage({ intent }: { intent: AuthIntent }) {
               <div className="auth-divider">
                 <span>hoặc dùng email</span>
               </div>
-              <form
-                className="email-otp-form"
-                onSubmit={emailStep === "request" ? requestCode : verifyCode}
-              >
-                {!methods?.emailOtp && (
-                  <p className="auth-method-unavailable">
-                    {methods
-                      ? "Email OTP chưa được cấu hình Resend hoặc SMTP."
-                      : "Đang kiểm tra dịch vụ email…"}
-                  </p>
-                )}
-                <fieldset disabled={!methods?.emailOtp || submitting}>
-                  {emailStep === "request" ? (
-                    <>
-                      {registering && (
+
+              {registering ? (
+                <form
+                  className="email-otp-form"
+                  onSubmit={
+                    registrationStep === "details"
+                      ? requestRegistrationCode
+                      : completeRegistration
+                  }
+                >
+                  {!methods?.emailOtp && (
+                    <p className="auth-method-unavailable">
+                      {methods
+                        ? "Xác minh email chưa được cấu hình Resend hoặc SMTP."
+                        : "Đang kiểm tra dịch vụ email…"}
+                    </p>
+                  )}
+                  <fieldset disabled={!methods?.emailOtp || submitting}>
+                    {registrationStep === "details" ? (
+                      <>
+                        <AuthInput
+                          label="Tên hiển thị"
+                          icon={<UserRound size={16} />}
+                          value={displayName}
+                          onChange={setDisplayName}
+                          autoComplete="name"
+                          minLength={2}
+                          maxLength={60}
+                          placeholder="Tên mọi người sẽ thấy"
+                        />
+                        <EmailInput value={email} onChange={setEmail} />
+                        <PasswordInput
+                          label="Mật khẩu"
+                          value={password}
+                          onChange={setPassword}
+                          autoComplete="new-password"
+                        />
+                        <PasswordInput
+                          label="Xác nhận mật khẩu"
+                          value={confirmPassword}
+                          onChange={setConfirmPassword}
+                          autoComplete="new-password"
+                        />
+                        <small className="auth-password-requirement">
+                          Ít nhất 12 ký tự, gồm chữ hoa, chữ thường và chữ số.
+                        </small>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          className="email-otp-back"
+                          onClick={() => {
+                            setRegistrationStep("details");
+                            setCode("");
+                            setError("");
+                            setMessage("");
+                          }}
+                        >
+                          <ArrowLeft size={14} /> Sửa thông tin
+                        </button>
                         <label>
-                          <span>Tên hiển thị</span>
-                          <span className="email-otp-input">
-                            <ShieldCheck size={16} />
+                          <span>
+                            Mã OTP gửi tới {email.trim().toLowerCase()}
+                          </span>
+                          <span className="email-otp-input code">
+                            <KeyRound size={16} />
                             <input
-                              value={displayName}
+                              value={code}
                               onChange={(event) =>
-                                setDisplayName(event.target.value)
+                                setCode(
+                                  event.target.value
+                                    .replace(/\D/g, "")
+                                    .slice(0, 6),
+                                )
                               }
-                              minLength={2}
-                              maxLength={60}
-                              autoComplete="name"
-                              placeholder="Tên mọi người sẽ thấy"
+                              inputMode="numeric"
+                              autoComplete="one-time-code"
+                              pattern="[0-9]{6}"
+                              placeholder="000000"
                               required
+                              autoFocus
                             />
                           </span>
                         </label>
-                      )}
-                      <label>
-                        <span>Email</span>
-                        <span className="email-otp-input">
-                          <Mail size={16} />
-                          <input
-                            type="email"
-                            value={email}
-                            onChange={(event) => setEmail(event.target.value)}
-                            maxLength={254}
-                            autoComplete="email"
-                            placeholder="ban@example.com"
-                            required
-                          />
-                        </span>
-                      </label>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        type="button"
-                        className="email-otp-back"
-                        onClick={() => {
-                          setEmailStep("request");
-                          setCode("");
-                          setError("");
-                          setMessage("");
-                        }}
-                      >
-                        <ArrowLeft size={14} /> Đổi email
-                      </button>
-                      <label>
-                        <span>Mã OTP gửi tới {email.trim().toLowerCase()}</span>
-                        <span className="email-otp-input code">
-                          <KeyRound size={16} />
-                          <input
-                            value={code}
-                            onChange={(event) =>
-                              setCode(
-                                event.target.value
-                                  .replace(/\D/g, "")
-                                  .slice(0, 6),
-                              )
-                            }
-                            inputMode="numeric"
-                            autoComplete="one-time-code"
-                            pattern="[0-9]{6}"
-                            placeholder="000000"
-                            required
-                            autoFocus
-                          />
-                        </span>
-                      </label>
-                    </>
-                  )}
-                  <button className="email-otp-submit" disabled={submitting}>
-                    {submitting ? (
-                      <LoaderCircle className="spin" size={17} />
-                    ) : emailStep === "request" ? (
-                      <Mail size={17} />
-                    ) : (
-                      <KeyRound size={17} />
+                      </>
                     )}
-                    {emailStep === "request"
-                      ? registering
-                        ? "Gửi mã đăng ký"
-                        : "Gửi mã đăng nhập"
-                      : registering
-                        ? "Xác nhận và tạo tài khoản"
-                        : "Xác nhận đăng nhập"}
-                  </button>
-                </fieldset>
-              </form>
+                    <SubmitButton submitting={submitting}>
+                      {registrationStep === "details"
+                        ? "Gửi mã xác minh"
+                        : "Xác nhận và tạo tài khoản"}
+                    </SubmitButton>
+                  </fieldset>
+                </form>
+              ) : (
+                <form className="email-otp-form" onSubmit={loginWithPassword}>
+                  <fieldset disabled={!methods?.emailPassword || submitting}>
+                    <EmailInput value={email} onChange={setEmail} />
+                    <PasswordInput
+                      label="Mật khẩu"
+                      value={password}
+                      onChange={setPassword}
+                      autoComplete="current-password"
+                      minLength={8}
+                    />
+                    <Link
+                      className="auth-forgot-password"
+                      href={forgotPasswordHref}
+                    >
+                      Quên mật khẩu?
+                    </Link>
+                    <SubmitButton submitting={submitting}>
+                      Đăng nhập
+                    </SubmitButton>
+                  </fieldset>
+                </form>
+              )}
+
               {message && (
                 <p className="email-otp-message success">{message}</p>
               )}
@@ -371,10 +442,10 @@ export function AuthEntryPage({ intent }: { intent: AuthIntent }) {
           <div className="auth-security">
             <ShieldCheck size={18} />
             <span>
-              <strong>Xác thực không dùng mật khẩu</strong>
+              <strong>Mật khẩu được bảo vệ</strong>
               <small>
-                Google phải cung cấp email đã xác minh. OTP từ taskflow-planner
-                chỉ dùng một lần và hết hạn sau 10 phút.
+                Mật khẩu được băm trước khi lưu. OTP chỉ dùng để xác minh đăng
+                ký hoặc đặt lại mật khẩu và hết hạn sau 10 phút.
               </small>
             </span>
           </div>
@@ -386,5 +457,107 @@ export function AuthEntryPage({ intent }: { intent: AuthIntent }) {
         </div>
       </div>
     </main>
+  );
+}
+
+function EmailInput({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <AuthInput
+      label="Email"
+      icon={<Mail size={16} />}
+      value={value}
+      onChange={onChange}
+      type="email"
+      autoComplete="email"
+      maxLength={254}
+      placeholder="ban@example.com"
+    />
+  );
+}
+
+function PasswordInput({
+  label,
+  value,
+  onChange,
+  autoComplete,
+  minLength = 12,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  autoComplete: "current-password" | "new-password";
+  minLength?: number;
+}) {
+  return (
+    <AuthInput
+      label={label}
+      icon={<LockKeyhole size={16} />}
+      value={value}
+      onChange={onChange}
+      type="password"
+      autoComplete={autoComplete}
+      minLength={minLength}
+      maxLength={128}
+      placeholder="••••••••••••"
+    />
+  );
+}
+
+function AuthInput({
+  label,
+  icon,
+  value,
+  onChange,
+  type = "text",
+  ...inputProps
+}: {
+  label: string;
+  icon: React.ReactNode;
+  value: string;
+  onChange: (value: string) => void;
+  type?: "text" | "email" | "password";
+} & Pick<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  "autoComplete" | "minLength" | "maxLength" | "placeholder"
+>) {
+  return (
+    <label>
+      <span>{label}</span>
+      <span className="email-otp-input">
+        {icon}
+        <input
+          {...inputProps}
+          type={type}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          required
+        />
+      </span>
+    </label>
+  );
+}
+
+function SubmitButton({
+  submitting,
+  children,
+}: {
+  submitting: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <button className="email-otp-submit" disabled={submitting}>
+      {submitting ? (
+        <LoaderCircle className="spin" size={17} />
+      ) : (
+        <KeyRound size={17} />
+      )}
+      {children}
+    </button>
   );
 }

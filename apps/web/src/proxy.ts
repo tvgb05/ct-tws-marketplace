@@ -4,6 +4,7 @@ import { hasValidSession } from "./lib/server-session";
 const publicPaths = new Set([
   "/login",
   "/register",
+  "/forgot-password",
   "/admin/login",
   "/privacy",
   "/terms",

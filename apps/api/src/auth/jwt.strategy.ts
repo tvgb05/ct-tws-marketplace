@@ -22,12 +22,18 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: { sub: string; adminCredentialVersion?: number }) {
+  async validate(payload: {
+    sub: string;
+    sessionVersion?: number;
+    adminCredentialVersion?: number;
+  }) {
     const record = await this.prisma.user.findUnique({
       where: { id: payload.sub },
       include: { adminCredential: true },
     });
     if (!record || record.status !== "ACTIVE")
+      throw new UnauthorizedException();
+    if ((payload.sessionVersion ?? 0) !== record.sessionVersion)
       throw new UnauthorizedException();
     if (
       record.role === "ADMIN" &&

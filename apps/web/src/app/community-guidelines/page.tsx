@@ -48,7 +48,7 @@ const faqGroups = [
       {
         question: "Website nhận được thông tin gì khi tôi đăng nhập?",
         answer:
-          "Google cung cấp mã tài khoản theo ứng dụng, tên hiển thị, email và ảnh đại diện. Với đăng nhập email, trang web chỉ xác nhận quyền sở hữu email bằng mã OTP dùng một lần; trang web không nhận mật khẩu Google hoặc mật khẩu email của bạn.",
+          "Google cung cấp mã tài khoản theo ứng dụng, tên hiển thị, email và ảnh đại diện; trang web không nhận mật khẩu Google. Với tài khoản email, mật khẩu được băm trước khi lưu và không được lưu ở dạng đọc được. OTP chỉ dùng để xác minh đăng ký hoặc đặt lại mật khẩu.",
       },
       {
         question: "Số điện thoại và đường dẫn Facebook có được xác minh không?",
@@ -63,7 +63,7 @@ const faqGroups = [
       {
         question: "Vì sao email OTP mang tên taskflow-planner?",
         answer:
-          "Website dùng hạ tầng email của dự án cũ taskflow-planner.site để gửi mã. Email hợp lệ có người gửi hiển thị là taskflow-planner, mã gồm 6 số và hết hạn sau 10 phút. Nếu chưa thấy, hãy kiểm tra cả Spam hoặc Thư rác.",
+          "Trang web dùng hạ tầng email của dự án cũ taskflow-planner.site để gửi mã xác minh đăng ký hoặc đặt lại mật khẩu. Email hợp lệ có người gửi hiển thị là taskflow-planner, mã gồm 6 số và hết hạn sau 10 phút. Nếu chưa thấy, hãy kiểm tra cả Spam hoặc Thư rác.",
       },
     ],
   },

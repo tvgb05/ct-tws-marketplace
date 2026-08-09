@@ -24,6 +24,7 @@
     "test:forum-admin": "pnpm --filter @tws/api test:forum-admin",
     "test:google-role": "pnpm --filter @tws/api test:google-role",
     "test:auth-intent": "pnpm --filter @tws/api test:auth-intent",
+    "test:password-auth": "pnpm --filter @tws/api test:password-auth",
     "test:mediation": "pnpm --filter @tws/api test:mediation",
     "test:security": "pnpm --filter @tws/api test:security && pnpm --filter @tws/web test:security",
     "admin:create": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/create-admin.ps1",

@@ -10,7 +10,7 @@ import { randomInt } from "node:crypto";
 import nodemailer from "nodemailer";
 import { Resend } from "resend";
 import { PrismaService } from "../prisma/prisma.service";
-import type { AuthIntent } from "./auth-intent";
+import type { EmailOtpIntent } from "./auth-intent";
 
 const OTP_TTL_MS = 10 * 60 * 1000;
 const MAX_ATTEMPTS = 5;
@@ -34,7 +34,7 @@ export class EmailOtpService {
     return Boolean(host && from && Boolean(user) === Boolean(password));
   }
 
-  async requestCode(email: string, intent: AuthIntent) {
+  async requestCode(email: string, intent: EmailOtpIntent) {
     if (!this.isAvailable())
       throw new ServiceUnavailableException(
         "Dịch vụ gửi email chưa được cấu hình.",
@@ -54,14 +54,13 @@ export class EmailOtpService {
         codeHash,
         expiresAt,
         intent,
-        contactPrivacyAcceptedAt: new Date(),
       },
     });
 
     const developmentEcho = this.developmentEchoEnabled();
     if (!developmentEcho) {
       try {
-        await this.sendCode(normalizedEmail, code, record.id);
+        await this.sendCode(normalizedEmail, code, record.id, intent);
       } catch (error) {
         this.logger.error(
           "Không thể gửi OTP qua nhà cung cấp email",
@@ -93,7 +92,7 @@ export class EmailOtpService {
     });
     if (
       !record ||
-      !record.contactPrivacyAcceptedAt ||
+      !new Set(["register", "reset-password"]).has(record.intent) ||
       record.attempts >= MAX_ATTEMPTS
     )
       throw new UnauthorizedException("Mã OTP không hợp lệ hoặc đã hết hạn");
@@ -125,14 +124,18 @@ export class EmailOtpService {
     return {
       email: normalizedEmail,
       intent:
-        record.intent === "register"
-          ? ("register" as const)
-          : ("login" as const),
-      contactPrivacyAcceptedAt: record.contactPrivacyAcceptedAt,
+        record.intent === "reset-password"
+          ? ("reset-password" as const)
+          : ("register" as const),
     };
   }
 
-  private async sendCode(email: string, code: string, requestId: string) {
+  private async sendCode(
+    email: string,
+    code: string,
+    requestId: string,
+    intent: EmailOtpIntent,
+  ) {
     const resendApiKey = this.config.get<string>("RESEND_API_KEY");
     if (resendApiKey) {
       const resend = new Resend(resendApiKey);
@@ -144,9 +147,9 @@ export class EmailOtpService {
         {
           from,
           to: [email],
-          subject: `${code} là mã đăng nhập taskflow-planner`,
-          text: this.emailText(code),
-          html: this.emailHtml(code),
+          subject: this.emailSubject(code, intent),
+          text: this.emailText(code, intent),
+          html: this.emailHtml(code, intent),
         },
         { idempotencyKey: `otp-${requestId}` },
       );
@@ -178,24 +181,34 @@ export class EmailOtpService {
     await transporter.sendMail({
       from,
       to: email,
-      subject: `${code} là mã đăng nhập taskflow-planner`,
-      text: this.emailText(code),
-      html: this.emailHtml(code),
+      subject: this.emailSubject(code, intent),
+      text: this.emailText(code, intent),
+      html: this.emailHtml(code, intent),
     });
   }
 
-  private emailText(code: string) {
+  private emailSubject(code: string, intent: EmailOtpIntent) {
+    return intent === "register"
+      ? `${code} là mã xác minh đăng ký taskflow-planner`
+      : `${code} là mã đặt lại mật khẩu taskflow-planner`;
+  }
+
+  private emailText(code: string, intent: EmailOtpIntent) {
+    const action =
+      intent === "register" ? "xác minh đăng ký" : "đặt lại mật khẩu";
     return [
-      "Bạn đang đăng nhập TWS Community Market qua hệ thống taskflow-planner.",
+      `Bạn đang ${action} TWS Community Market qua hệ thống taskflow-planner.`,
       `Mã OTP của bạn là: ${code}`,
       "Mã có hiệu lực trong 10 phút và chỉ dùng một lần.",
-      "Nếu không thấy email OTP ở lần đăng nhập sau, hãy kiểm tra cả thư mục Spam hoặc Thư rác và tìm người gửi taskflow-planner.",
+      "Nếu chưa thấy email, hãy kiểm tra cả thư mục Spam hoặc Thư rác và tìm người gửi taskflow-planner.",
       "Nếu bạn không yêu cầu mã này, hãy bỏ qua email.",
     ].join("\n\n");
   }
 
-  private emailHtml(code: string) {
-    return `<div style="max-width:520px;margin:0 auto;padding:28px;font-family:Arial,sans-serif;color:#17231f"><p style="margin:0 0 8px;color:#6d7c76;font-size:13px">taskflow-planner</p><h1 style="margin:0 0 20px;font-size:22px">Mã đăng nhập TWS Community Market</h1><p>Mã OTP của bạn là:</p><p style="margin:18px 0;padding:16px;background:#f2f5ef;border-radius:8px;text-align:center;font-size:30px;font-weight:700;letter-spacing:7px">${code}</p><p>Mã có hiệu lực trong <strong>10 phút</strong> và chỉ dùng một lần.</p><p style="padding:12px;background:#fff7e6;border-radius:6px;font-size:13px">Nếu không thấy email OTP ở lần đăng nhập sau, hãy kiểm tra cả <strong>Spam/Thư rác</strong> và tìm người gửi <strong>taskflow-planner</strong>.</p><p style="color:#6d7c76;font-size:12px">Nếu bạn không yêu cầu mã này, hãy bỏ qua email. Email được gửi bởi taskflow-planner.site cho TWS Community Market.</p></div>`;
+  private emailHtml(code: string, intent: EmailOtpIntent) {
+    const heading =
+      intent === "register" ? "Xác minh đăng ký" : "Đặt lại mật khẩu";
+    return `<div style="max-width:520px;margin:0 auto;padding:28px;font-family:Arial,sans-serif;color:#17231f"><p style="margin:0 0 8px;color:#6d7c76;font-size:13px">taskflow-planner</p><h1 style="margin:0 0 20px;font-size:22px">${heading} TWS Community Market</h1><p>Mã OTP của bạn là:</p><p style="margin:18px 0;padding:16px;background:#f2f5ef;border-radius:8px;text-align:center;font-size:30px;font-weight:700;letter-spacing:7px">${code}</p><p>Mã có hiệu lực trong <strong>10 phút</strong> và chỉ dùng một lần.</p><p style="padding:12px;background:#fff7e6;border-radius:6px;font-size:13px">Nếu chưa thấy email, hãy kiểm tra cả <strong>Spam/Thư rác</strong> và tìm người gửi <strong>taskflow-planner</strong>.</p><p style="color:#6d7c76;font-size:12px">Nếu bạn không yêu cầu mã này, hãy bỏ qua email. Email được gửi bởi taskflow-planner.site cho TWS Community Market.</p></div>`;
   }
 
   private developmentEchoEnabled() {

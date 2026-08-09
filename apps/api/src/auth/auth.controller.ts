@@ -24,7 +24,9 @@ import { AdminLoginDto } from "./dto/admin-login.dto";
 import { ChangeAdminPasswordDto } from "./dto/change-admin-password.dto";
 import { EmailOtpService } from "./email-otp.service";
 import { RequestEmailOtpDto } from "./dto/request-email-otp.dto";
-import { VerifyEmailOtpDto } from "./dto/verify-email-otp.dto";
+import { EmailPasswordLoginDto } from "./dto/email-password-login.dto";
+import { RegisterEmailDto } from "./dto/register-email.dto";
+import { ResetEmailPasswordDto } from "./dto/reset-email-password.dto";
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import { GoogleOAuthGuard } from "./google-oauth.guard";
 import { authIntentFrom, type AuthIntent } from "./auth-intent";
@@ -57,6 +59,7 @@ export class AuthController {
           this.config.get("GOOGLE_CALLBACK_URL"),
       ),
       emailOtp: this.emailOtp.isAvailable(),
+      emailPassword: true,
     };
   }
 
@@ -136,21 +139,22 @@ export class AuthController {
     return this.emailOtp.requestCode(input.email, input.intent);
   }
 
-  @Post("email/verify-code")
+  @Post("email/register")
   @Throttle({ default: { limit: 10, ttl: 10 * 60_000 } })
-  async verifyEmailCode(
-    @Body() input: VerifyEmailOtpDto,
+  async registerWithEmail(
+    @Body() input: RegisterEmailDto,
     @Res({ passthrough: true }) response: Response,
   ) {
     const verified = await this.emailOtp.verifyCode(input.email, input.code);
-    const result = await this.auth.loginWithEmail(
+    if (verified.intent !== "register")
+      throw new UnauthorizedException("Mã OTP không đúng mục đích đăng ký");
+    const result = await this.auth.registerWithEmail(
       verified.email,
       input.displayName,
-      verified.contactPrivacyAcceptedAt,
-      verified.intent,
-      input.remember,
+      input.password,
+      Boolean(input.remember),
     );
-    this.setSessionCookie(response, result.token, input.remember);
+    this.setSessionCookie(response, result.token, Boolean(input.remember));
     return {
       id: result.user.id,
       displayName: result.user.displayName,
@@ -158,6 +162,46 @@ export class AuthController {
       role: result.user.role,
       profileCompleted: this.profileCompleted(result.user),
     };
+  }
+
+  @Post("email/login")
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  async loginWithEmailPassword(
+    @Body() input: EmailPasswordLoginDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const result = await this.auth.loginWithEmailPassword(
+      input.email,
+      input.password,
+      Boolean(input.remember),
+    );
+    this.setSessionCookie(response, result.token, Boolean(input.remember));
+    return {
+      id: result.user.id,
+      displayName: result.user.displayName,
+      email: result.user.email,
+      role: result.user.role,
+      profileCompleted: this.profileCompleted(result.user),
+    };
+  }
+
+  @Post("email/reset-password")
+  @Throttle({ default: { limit: 5, ttl: 10 * 60_000 } })
+  async resetEmailPassword(
+    @Body() input: ResetEmailPasswordDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const verified = await this.emailOtp.verifyCode(input.email, input.code);
+    if (verified.intent !== "reset-password")
+      throw new UnauthorizedException(
+        "Mã OTP không đúng mục đích đặt lại mật khẩu",
+      );
+    const result = await this.auth.resetEmailPassword(
+      verified.email,
+      input.password,
+    );
+    response.clearCookie("tws_session", this.cookieOptions());
+    return result;
   }
 
   @Get("facebook")

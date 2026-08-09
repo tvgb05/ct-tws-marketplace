@@ -104,14 +104,9 @@ export class AuthService {
       });
       return {
         user,
-        token: await this.jwt.signAsync(
-          {
-            sub: user.id,
-            role: user.role,
-            adminCredentialVersion: adminCredential.updatedAt.getTime(),
-          },
-          { expiresIn: rememberForThirtyDays ? "30d" : "15m" },
-        ),
+        token: await this.signSession(user, rememberForThirtyDays, {
+          adminCredentialVersion: adminCredential.updatedAt.getTime(),
+        }),
       };
     }
 
@@ -125,25 +120,150 @@ export class AuthService {
     );
   }
 
-  loginWithEmail(
+  async registerWithEmail(
     email: string,
-    displayName: string | undefined,
-    contactPrivacyAcceptedAt: Date,
-    intent: AuthIntent,
+    displayName: string,
+    password: string,
     rememberForThirtyDays = false,
   ) {
+    const passwordHash = await hash(password, 12);
     return this.loginWithIdentity(
       AuthProvider.EMAIL,
       {
         providerUserId: email,
-        displayName: displayName?.trim() || "Thành viên TWS",
+        displayName: displayName.trim(),
         email,
       },
       rememberForThirtyDays,
       undefined,
-      contactPrivacyAcceptedAt,
-      intent,
+      undefined,
+      "register",
+      passwordHash,
     );
+  }
+
+  async loginWithEmailPassword(
+    email: string,
+    password: string,
+    rememberForThirtyDays = false,
+  ) {
+    const adminCredential = await this.prisma.adminCredential.findUnique({
+      where: { email },
+    });
+    if (adminCredential) {
+      return this.loginWithAdmin({
+        email,
+        password,
+        remember: rememberForThirtyDays,
+      });
+    }
+
+    const identity = await this.prisma.authIdentity.findUnique({
+      where: {
+        provider_providerUserId: {
+          provider: AuthProvider.EMAIL,
+          providerUserId: email,
+        },
+      },
+      include: { user: true },
+    });
+    const validPassword =
+      identity?.passwordHash &&
+      (await compare(password, identity.passwordHash));
+    if (
+      !identity ||
+      !validPassword ||
+      identity.user.role !== "USER" ||
+      identity.user.status !== "ACTIVE"
+    ) {
+      throw new UnauthorizedException("Email hoặc mật khẩu không chính xác");
+    }
+
+    const user = await this.prisma.user.update({
+      where: { id: identity.userId },
+      data: { lastLoginAt: new Date() },
+    });
+    return {
+      user,
+      token: await this.signSession(user, rememberForThirtyDays),
+    };
+  }
+
+  async resetEmailPassword(email: string, password: string) {
+    const adminCredential = await this.prisma.adminCredential.findUnique({
+      where: { email },
+      include: { user: true },
+    });
+    const passwordHash = await hash(password, 12);
+    if (adminCredential) {
+      if (adminCredential.user.status !== "ACTIVE")
+        throw new UnauthorizedException("Tài khoản đã bị hạn chế");
+      await this.prisma.$transaction([
+        this.prisma.adminCredential.update({
+          where: { id: adminCredential.id },
+          data: { passwordHash },
+        }),
+        this.prisma.user.update({
+          where: { id: adminCredential.userId },
+          data: { sessionVersion: { increment: 1 } },
+        }),
+        this.prisma.auditLog.create({
+          data: {
+            actorId: adminCredential.userId,
+            action: "ADMIN_PASSWORD_RESET",
+            entityType: "AdminCredential",
+            entityId: adminCredential.id,
+          },
+        }),
+      ]);
+      return { success: true };
+    }
+
+    const users = await this.prisma.user.findMany({
+      where: { email: { equals: email, mode: "insensitive" } },
+      take: 2,
+    });
+    if (users.length !== 1 || users[0].role !== "USER")
+      throw new NotFoundException("Không tìm thấy tài khoản phù hợp với email");
+    const user = users[0];
+    if (user.status !== "ACTIVE")
+      throw new UnauthorizedException("Tài khoản đã bị hạn chế");
+
+    const existingIdentity = await this.prisma.authIdentity.findUnique({
+      where: {
+        provider_providerUserId: {
+          provider: AuthProvider.EMAIL,
+          providerUserId: email,
+        },
+      },
+    });
+    if (existingIdentity && existingIdentity.userId !== user.id)
+      throw new ConflictException(
+        "Email đang gắn với nhiều tài khoản. Vui lòng liên hệ quản trị viên.",
+      );
+
+    await this.prisma.$transaction([
+      this.prisma.authIdentity.upsert({
+        where: {
+          provider_providerUserId: {
+            provider: AuthProvider.EMAIL,
+            providerUserId: email,
+          },
+        },
+        create: {
+          userId: user.id,
+          provider: AuthProvider.EMAIL,
+          providerUserId: email,
+          passwordHash,
+        },
+        update: { passwordHash },
+      }),
+      this.prisma.user.update({
+        where: { id: user.id },
+        data: { sessionVersion: { increment: 1 } },
+      }),
+    ]);
+    return { success: true };
   }
 
   private async loginWithIdentity(
@@ -153,6 +273,7 @@ export class AuthService {
     facebookProfileUrl?: string,
     contactPrivacyAcceptedAt?: Date,
     intent?: AuthIntent,
+    identityPasswordHash?: string,
   ) {
     const identity = await this.prisma.authIdentity.findUnique({
       where: {
@@ -230,7 +351,11 @@ export class AuthService {
             data: {
               ...profileUpdates,
               authIdentities: {
-                create: { provider, providerUserId: profile.providerUserId },
+                create: {
+                  provider,
+                  providerUserId: profile.providerUserId,
+                  passwordHash: identityPasswordHash,
+                },
               },
             },
           })
@@ -249,6 +374,7 @@ export class AuthService {
                 create: {
                   provider,
                   providerUserId: profile.providerUserId,
+                  passwordHash: identityPasswordHash,
                 },
               },
             },
@@ -258,10 +384,7 @@ export class AuthService {
       throw new UnauthorizedException("Tài khoản đã bị hạn chế");
     return {
       user,
-      token: await this.jwt.signAsync(
-        { sub: user.id, role: user.role },
-        { expiresIn: rememberForThirtyDays ? "30d" : "15m" },
-      ),
+      token: await this.signSession(user, rememberForThirtyDays),
     };
   }
 
@@ -282,16 +405,9 @@ export class AuthService {
     });
     return {
       user,
-      token: await this.jwt.signAsync(
-        {
-          sub: user.id,
-          role: user.role,
-          ...(user.role === "ADMIN"
-            ? { adminCredentialVersion: credential.updatedAt.getTime() }
-            : {}),
-        },
-        { expiresIn: input.remember ? "30d" : "15m" },
-      ),
+      token: await this.signSession(user, Boolean(input.remember), {
+        adminCredentialVersion: credential.updatedAt.getTime(),
+      }),
     };
   }
 
@@ -429,6 +545,26 @@ export class AuthService {
         contactPrivacyVersion: CONTACT_PRIVACY_POLICY_VERSION,
       },
     });
+  }
+
+  private signSession(
+    user: {
+      id: string;
+      role: "USER" | "ADMIN";
+      sessionVersion: number;
+    },
+    rememberForThirtyDays: boolean,
+    extra: { adminCredentialVersion?: number } = {},
+  ) {
+    return this.jwt.signAsync(
+      {
+        sub: user.id,
+        role: user.role,
+        sessionVersion: user.sessionVersion,
+        ...extra,
+      },
+      { expiresIn: rememberForThirtyDays ? "30d" : "15m" },
+    );
   }
 
   private normalizeFacebookProfileUrl(value?: string | null) {

@@ -38,6 +38,7 @@ const apiUrl =
 const publicPaths = new Set([
   "/login",
   "/register",
+  "/forgot-password",
   "/admin/login",
   "/privacy",
   "/terms",

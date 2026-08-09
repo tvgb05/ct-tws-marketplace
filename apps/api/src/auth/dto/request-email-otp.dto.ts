@@ -6,7 +6,7 @@ import {
   IsOptional,
   MaxLength,
 } from "class-validator";
-import { AUTH_INTENTS, type AuthIntent } from "../auth-intent";
+import { EMAIL_OTP_INTENTS, type EmailOtpIntent } from "../auth-intent";
 
 export class RequestEmailOtpDto {
   @Transform(({ value }) =>
@@ -18,8 +18,8 @@ export class RequestEmailOtpDto {
   @MaxLength(254)
   email: string;
 
-  @IsIn(AUTH_INTENTS)
-  intent: AuthIntent;
+  @IsIn(EMAIL_OTP_INTENTS)
+  intent: EmailOtpIntent;
 
   // Backward compatible with older deployed web clients; no consent is required.
   @IsOptional()

@@ -1859,6 +1859,45 @@ html[data-theme="dark"] .theme-toggle .theme-icon-sun {
   font-size: 9px;
   font-weight: 700;
 }
+.auth-forgot-password {
+  width: max-content;
+  margin-left: auto;
+  color: var(--rust);
+  font-size: 11px;
+  font-weight: 700;
+}
+.auth-forgot-password:hover {
+  text-decoration: underline;
+}
+.auth-password-requirement {
+  display: block;
+  margin-top: -3px;
+  color: var(--ink-soft);
+  font-size: 10px;
+  line-height: 1.5;
+}
+.forgot-password-box > .email-otp-back {
+  margin-bottom: 24px;
+}
+.forgot-password-form {
+  margin-top: 22px;
+}
+.password-reset-success {
+  margin-top: 24px;
+  padding: 28px;
+  border: 1px solid #bdd8c7;
+  background: #edf6ef;
+  color: #27613e;
+  text-align: center;
+}
+.password-reset-success h2 {
+  margin: 12px 0 5px;
+  color: var(--ink);
+}
+.password-reset-success p {
+  margin: 0 0 18px;
+  color: var(--ink-soft);
+}
 .auth-box > .email-otp-message {
   margin: 9px 0 0;
   padding: 8px 10px;
@@ -5334,6 +5373,11 @@ html[data-theme="dark"] .auth-method-unavailable {
   color: #efc47d;
 }
 html[data-theme="dark"] .email-otp-message.success {
+  background: #193729;
+  color: #a9dfbd;
+}
+html[data-theme="dark"] .password-reset-success {
+  border-color: #3d5b4d;
   background: #193729;
   color: #a9dfbd;
 }
