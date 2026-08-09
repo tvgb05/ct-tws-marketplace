@@ -1791,29 +1791,6 @@ html[data-theme="dark"] .theme-toggle .theme-icon-sun {
   font-size: 9px;
   font-weight: 700;
 }
-.email-otp-form fieldset > .auth-contact-notice {
-  padding: 10px;
-  border: 1px solid #d8dfdb;
-  background: #f5f7f3;
-  display: flex;
-  align-items: flex-start;
-  gap: 9px;
-  color: var(--pine);
-}
-.auth-contact-notice > svg {
-  margin: 1px 0 0;
-  flex: 0 0 auto;
-}
-.auth-contact-notice > span {
-  display: grid;
-  gap: 4px;
-}
-.auth-contact-notice small {
-  color: #67766f;
-  font-size: 8px;
-  font-weight: 500;
-  line-height: 1.55;
-}
 .auth-method-unavailable {
   margin: 0;
   padding: 8px 10px;
@@ -5335,7 +5312,6 @@ html[data-theme="dark"] .auth-page {
 }
 html[data-theme="dark"] .google-login-button,
 html[data-theme="dark"] .email-otp-input,
-html[data-theme="dark"] .auth-contact-notice,
 html[data-theme="dark"] .auth-mode-tabs,
 html[data-theme="dark"] .profile-setup-form > .profile-contact-notice {
   background: #162337;
@@ -5350,7 +5326,6 @@ html[data-theme="dark"] .email-otp-form fieldset > label,
 html[data-theme="dark"] .email-otp-input input {
   color: #d8e0eb;
 }
-html[data-theme="dark"] .auth-contact-notice small,
 html[data-theme="dark"] .profile-contact-notice small {
   color: #aebaca;
 }

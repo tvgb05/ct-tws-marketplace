@@ -288,17 +288,6 @@ export function AuthEntryPage({ intent }: { intent: AuthIntent }) {
                           />
                         </span>
                       </label>
-                      <div className="auth-contact-notice">
-                        <ShieldCheck size={17} />
-                        <span>
-                          <strong>Cam kết bảo vệ thông tin từ nền tảng</strong>
-                          <small>
-                            TWS Community Market bảo vệ số điện thoại và URL
-                            Facebook, chỉ cung cấp trong luồng liên hệ giao dịch
-                            hoặc hỗ trợ an toàn; không bán cho nhà quảng cáo.
-                          </small>
-                        </span>
-                      </div>
                     </>
                   ) : (
                     <>
