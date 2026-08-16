@@ -314,6 +314,7 @@ export function MarketplaceExplorer() {
                 <div className="filter-options">
                   <button
                     className={selectedCategories.length === 0 ? "active" : ""}
+                    aria-pressed={selectedCategories.length === 0}
                     onClick={() => toggleCategory("all")}
                   >
                     Tất cả
@@ -326,6 +327,7 @@ export function MarketplaceExplorer() {
                         className={
                           selectedCategories.includes(item.slug) ? "active" : ""
                         }
+                        aria-pressed={selectedCategories.includes(item.slug)}
                         onClick={() => toggleCategory(item.slug)}
                       >
                         {item.label}
@@ -340,6 +342,7 @@ export function MarketplaceExplorer() {
                         className={
                           selectedSubcategories.length === 0 ? "active" : ""
                         }
+                        aria-pressed={selectedSubcategories.length === 0}
                         onClick={() => {
                           setSelectedSubcategories([]);
                           setPage(1);
@@ -355,6 +358,7 @@ export function MarketplaceExplorer() {
                               ? "active"
                               : ""
                           }
+                          aria-pressed={selectedSubcategories.includes(item.slug)}
                           onClick={() => toggleSubcategory(item.slug)}
                         >
                           {item.label}

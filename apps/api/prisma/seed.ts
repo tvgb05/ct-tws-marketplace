@@ -232,7 +232,7 @@ async function main() {
     ["Làm đẹp", "beauty", "✿"],
     ["Thể thao", "sports", "◆"],
     ["Xe cộ", "vehicles", "◈"],
-    ["Thực phẩm", "food", "◐"],
+    ["Dịch vụ", "services", "⚙"],
     ["Khác", "other", "…"],
   ];
   await prisma.category.updateMany({
@@ -251,9 +251,16 @@ async function main() {
       },
     });
   }
-  const [techCategory, legacyFlashlightCategory] = await Promise.all([
+  const [
+    techCategory,
+    legacyFlashlightCategory,
+    servicesCategory,
+    legacyFoodCategory,
+  ] = await Promise.all([
     prisma.category.findUnique({ where: { slug: "tech" } }),
     prisma.category.findUnique({ where: { slug: "flashlights" } }),
+    prisma.category.findUnique({ where: { slug: "services" } }),
+    prisma.category.findUnique({ where: { slug: "food" } }),
   ]);
   if (techCategory && legacyFlashlightCategory) {
     const migrated = await prisma.listing.updateMany({
@@ -266,6 +273,20 @@ async function main() {
     if (migrated.count) {
       console.info(
         `Moved ${migrated.count} flashlight listings under the tech category`,
+      );
+    }
+  }
+  if (servicesCategory && legacyFoodCategory) {
+    const migrated = await prisma.listing.updateMany({
+      where: { categoryId: legacyFoodCategory.id },
+      data: {
+        categoryId: servicesCategory.id,
+        subcategory: "other-services",
+      },
+    });
+    if (migrated.count) {
+      console.info(
+        `Moved ${migrated.count} food listings under the services category`,
       );
     }
   }

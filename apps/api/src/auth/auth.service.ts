@@ -66,15 +66,9 @@ export class AuthService {
     rememberForThirtyDays = false,
     intent: AuthIntent = "login",
   ) {
-    const adminCredential = await this.prisma.adminCredential.findFirst({
-      where: {
-        email: { equals: profile.email, mode: "insensitive" },
-        user: { role: "ADMIN" },
-      },
-      include: { user: true },
-    });
-    if (adminCredential) {
-      if (adminCredential.user.status !== "ACTIVE")
+    const adminAccount = await this.findAdminAccountByEmail(profile.email);
+    if (adminAccount) {
+      if (adminAccount.user.status !== "ACTIVE")
         throw new UnauthorizedException("Tài khoản đã bị hạn chế");
 
       const user = await this.prisma.$transaction(async (tx) => {
@@ -86,14 +80,14 @@ export class AuthService {
             },
           },
           create: {
-            userId: adminCredential.userId,
+            userId: adminAccount.user.id,
             provider: AuthProvider.GOOGLE,
             providerUserId: profile.providerUserId,
           },
-          update: { userId: adminCredential.userId },
+          update: { userId: adminAccount.user.id },
         });
         return tx.user.update({
-          where: { id: adminCredential.userId },
+          where: { id: adminAccount.user.id },
           data: {
             displayName: profile.displayName,
             avatarUrl: profile.avatarUrl,
@@ -105,7 +99,7 @@ export class AuthService {
       return {
         user,
         token: await this.signSession(user, rememberForThirtyDays, {
-          adminCredentialVersion: adminCredential.updatedAt.getTime(),
+          adminCredentialVersion: adminAccount.credentialVersion,
         }),
       };
     }
@@ -291,7 +285,7 @@ export class AuthService {
       );
 
     const usersByEmail =
-      !identity && profile.email
+      profile.email
         ? await this.prisma.user.findMany({
             where: {
               email: { equals: profile.email, mode: "insensitive" },
@@ -299,15 +293,16 @@ export class AuthService {
             take: 2,
           })
         : [];
-    if (usersByEmail.length > 1)
-      throw new ConflictException(
-        "Email này đang gắn với nhiều tài khoản. Vui lòng liên hệ admin.",
-      );
-    const existingByEmail = usersByEmail[0] ?? null;
-    if (existingByEmail?.role === "ADMIN")
+    const adminsByEmail = usersByEmail.filter((user) => user.role === "ADMIN");
+    if (adminsByEmail.length)
       throw new UnauthorizedException(
         "Tài khoản quản trị cần đăng nhập bằng Google đã xác minh",
       );
+    if (!identity && usersByEmail.length > 1)
+      throw new ConflictException(
+        "Email này đang gắn với nhiều tài khoản. Vui lòng liên hệ admin.",
+      );
+    const existingByEmail = identity ? null : (usersByEmail[0] ?? null);
     const existingAccount = identity?.user ?? existingByEmail;
     if (existingAccount && existingAccount.status !== "ACTIVE")
       throw new UnauthorizedException("Tài khoản đã bị hạn chế");
@@ -565,6 +560,54 @@ export class AuthService {
       },
       { expiresIn: rememberForThirtyDays ? "30d" : "15m" },
     );
+  }
+
+  private async findAdminAccountByEmail(email: string) {
+    const [credentials, adminUsers] = await Promise.all([
+      this.prisma.adminCredential.findMany({
+        where: {
+          email: { equals: email, mode: "insensitive" },
+          user: { role: "ADMIN" },
+        },
+        include: { user: true },
+        take: 2,
+      }),
+      this.prisma.user.findMany({
+        where: {
+          email: { equals: email, mode: "insensitive" },
+          role: "ADMIN",
+        },
+        include: { adminCredential: true },
+        take: 2,
+      }),
+    ]);
+    const candidates = new Map<
+      string,
+      {
+        user: (typeof credentials)[number]["user"];
+        credentialVersion: number;
+      }
+    >();
+
+    for (const credential of credentials) {
+      candidates.set(credential.userId, {
+        user: credential.user,
+        credentialVersion: credential.updatedAt.getTime(),
+      });
+    }
+    for (const user of adminUsers) {
+      if (!user.adminCredential) continue;
+      candidates.set(user.id, {
+        user,
+        credentialVersion: user.adminCredential.updatedAt.getTime(),
+      });
+    }
+
+    if (candidates.size > 1)
+      throw new ConflictException(
+        "Email này đang gắn với nhiều tài khoản quản trị. Vui lòng kiểm tra dữ liệu.",
+      );
+    return candidates.values().next().value ?? null;
   }
 
   private normalizeFacebookProfileUrl(value?: string | null) {

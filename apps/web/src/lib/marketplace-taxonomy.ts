@@ -143,14 +143,16 @@ export const categories: MarketplaceCategory[] = [
     ],
   },
   {
-    slug: "food",
-    label: "Thực phẩm",
-    icon: "◐",
+    slug: "services",
+    label: "Dịch vụ",
+    icon: "⚙",
     subcategories: [
-      { slug: "dry-food", label: "Đồ khô" },
-      { slug: "beverages", label: "Đồ uống" },
-      { slug: "homemade-food", label: "Đồ nhà làm" },
-      { slug: "specialties", label: "Đặc sản" },
+      { slug: "repairs-maintenance", label: "Sửa chữa & bảo trì" },
+      { slug: "cleaning-services", label: "Vệ sinh" },
+      { slug: "transportation", label: "Vận chuyển" },
+      { slug: "education-training", label: "Gia sư & đào tạo" },
+      { slug: "design-technology", label: "Thiết kế & công nghệ" },
+      { slug: "other-services", label: "Dịch vụ khác" },
     ],
   },
   {
